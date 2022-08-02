@@ -9,4 +9,9 @@ urlpatterns = [
     path("add-to-cart", AddToCartView.as_view()),
     path("order-summary", OrderDetailView.as_view()),
     path("order-summary/update-quantity", UpdateOrderQuantity.as_view()),
+    path("comments", CommentListView.as_view()),
+    path("comment/create", CommentsCreateView.as_view()),
+    path("comment/<int:pk>", CommentDetailView.as_view()),
+    path("comment/delete/<int:pk>", CommentDestroyView.as_view()),
+    path("comment/update/<int:pk>", CommentUpdateView.as_view()),
 ]

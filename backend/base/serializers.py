@@ -5,13 +5,25 @@ from .models import *
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = "__all__"
+        fields = ("id", "name", "email")
 
 
 class CommentsSerializer(ModelSerializer):
+    creator = UserSerializer(read_only=True)
+    restaurant = SerializerMethodField(read_only=True)
+
     class Meta:
         model = Comments
-        fields = ("id", "creator", "commented_subject", "created", "body", "rate")
+        fields = ("restaurant", "body", "rate", "creator", "commented_subject")
+
+    def get_restaurant(self, obj):
+        return obj.commented_subject.name
+
+
+class CommentsUpdateSerializer(ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ("body", "rate")
 
 
 class RestaurantSerializer(ModelSerializer):

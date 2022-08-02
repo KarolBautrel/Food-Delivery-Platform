@@ -5,7 +5,7 @@ from .models import *
 from rest_framework import generics
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS, AllowAny
-from .permissions import ReadOnly
+from .permissions import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -18,7 +18,6 @@ class ListRestaurantsViewset(generics.ListAPIView):
     queryset = Restaurant.objects.all()
     permission_classes = [AllowAny]
     serializer_class = RestaurantSerializer
-    # permission_classes = [IsAuthenticated | ReadOnly]
 
 
 class RetrieveRestaurantViewset(generics.RetrieveAPIView):
@@ -31,14 +30,10 @@ class DishDetailViewset(generics.RetrieveAPIView):
     serializer_class = DishSerializer
 
 
-# class CartView(APIView):
-#     def get(self, *args, **kwargs):
-#         queryset = OrderItem.objects.all()
-#         serializer_class = CartSerializer(queryset, many=False)
-#         return Response(serializer_class.data)
-
-
 class AddToCartView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request, *args, **kwargs):
         try:
             product_id = request.data.get("product", None)
@@ -77,6 +72,8 @@ class AddToCartView(APIView):
 
 
 class UpdateOrderQuantity(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request, *args, **kwargs):
         product_id = request.data.get("product", None)
 
@@ -89,11 +86,9 @@ class UpdateOrderQuantity(APIView):
         )
 
         order_qs = Order.objects.filter(user=request.user, ordered=False)
-        print("siema")
         if order_qs.exists():
             order = order_qs[0]
             if order.items.filter(item__id=item.id).exists():
-                print("1")
                 order_item = OrderItem.objects.filter(
                     item=item, user=request.user, ordered=False
                 )[0]
@@ -111,7 +106,6 @@ class UpdateOrderQuantity(APIView):
                 )
 
         else:
-            print("2")
             return Response(
                 {"message": "You do not have an active order"},
                 status=HTTP_400_BAD_REQUEST,
@@ -119,7 +113,10 @@ class UpdateOrderQuantity(APIView):
 
 
 class OrderItemCartDetailView(generics.ListAPIView):
+
     queryset = OrderItem.objects.all()
+    permission_classes = (IsAuthenticated,)
+
     serializer_class = OrderItemSerializer
 
     def get_queryset(self):
@@ -135,3 +132,35 @@ class OrderDetailView(generics.ListAPIView):
     def get_queryset(self):
         queryset = Order.objects.filter(user=self.request.user)
         return queryset
+
+
+class CommentsCreateView(generics.CreateAPIView):
+    queryset = Comments.objects.all()
+    serializer_class = CommentsSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def perform_create(self, serializer):
+        serializer.save(creator=self.request.user)
+
+
+class CommentDetailView(generics.RetrieveAPIView):
+    queryset = Comments.objects.all()
+    serializer_class = CommentsSerializer
+
+
+class CommentDestroyView(generics.DestroyAPIView):
+    queryset = Comments.objects.all()
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = CommentsSerializer
+
+
+class CommentUpdateView(generics.UpdateAPIView):
+    queryset = Comments.objects.all()
+    permission_classes = (ContentCreatorAllow,)
+    serializer_class = CommentsUpdateSerializer
+
+
+class CommentListView(generics.ListAPIView):
+    queryset = Comments.objects.all()
+    serializer_class = CommentsSerializer
