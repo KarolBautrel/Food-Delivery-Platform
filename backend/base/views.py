@@ -12,6 +12,7 @@ from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class RetrieveCurrentUserView(generics.RetrieveAPIView):
@@ -27,6 +28,8 @@ class ListRestaurantsViewset(generics.ListAPIView):
     queryset = Restaurant.objects.all()
     permission_classes = [AllowAny]
     serializer_class = RestaurantSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["city", "name"]
 
 
 class RetrieveRestaurantViewset(generics.RetrieveAPIView):
@@ -37,6 +40,8 @@ class RetrieveRestaurantViewset(generics.RetrieveAPIView):
 class DishDetailViewset(generics.RetrieveAPIView):
     queryset = Dish.objects.all()
     serializer_class = DishSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["name"]
 
 
 class AddToCartView(APIView):
