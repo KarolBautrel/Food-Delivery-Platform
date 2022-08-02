@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "djoser",
+    "rest_framework.authtoken",
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
