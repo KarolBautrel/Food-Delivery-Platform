@@ -189,7 +189,6 @@ class BookTableView(APIView):
             tables_quantity = int(request.data.get("tables_quantity", None))
         except ValueError:
             return Response({"Message": "Restauran doesnt exist"})
-        print(tables_quantity)
         restaurant_qs = Restaurant.objects.filter(id=restaurant_id)
         if restaurant_qs.exists:
             restaurant = restaurant_qs.first()

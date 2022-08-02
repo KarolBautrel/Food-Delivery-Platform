@@ -8,4 +8,4 @@
 -Cart Adding /Shipment system (With email sending by Celer***)
 -Booking table feature  *
 -Leaflet geolocation with Restaurants
--Searchbar (first only by City, in future next showing with map)
+-Searchbar (first only by City, in future next showing with map)*
