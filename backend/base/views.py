@@ -13,6 +13,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from django_filters.rest_framework import DjangoFilterBackend
+from tasks import add
+from redis_management import redis_client
 
 
 class RetrieveCurrentUserView(generics.RetrieveAPIView):
@@ -200,6 +202,7 @@ class BookTableView(APIView):
                     restaurant=restaurant,
                     tables_quantity=tables_quantity,
                 )
+                add.delay(1, 2)
                 return Response({"Message": "success"}, status=HTTP_200_OK)
             else:
                 return Response(
