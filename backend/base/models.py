@@ -113,3 +113,18 @@ class Comments(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     body = models.TextField(max_length=255)
     rate = IntegerRangeField(min_value=1, max_value=50)
+
+    def __str__(self):
+        return f"{self.creator} to {self.commented_subject}"
+
+
+class TableBooking(models.Model):
+    booker = models.ForeignKey(User, on_delete=models.CASCADE, related_name="booker")
+    restaurant = models.ForeignKey(
+        Restaurant, on_delete=models.CASCADE, related_name="restaurant"
+    )
+    tables_quantity = models.IntegerField(blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.booker.name} to {self.restaurant.name} on {self.created}"

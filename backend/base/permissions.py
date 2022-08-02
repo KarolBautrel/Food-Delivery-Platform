@@ -32,3 +32,17 @@ class ContentCreatorAllow(BasePermission):
         if obj.creator == request.user:
             return True
         return False
+
+
+class TableBookerAllow(BasePermission):
+    message = "Only booker of Table can delete it "
+
+    def has_permission(self, request, view):
+        if request.user.is_authenticated:
+            return True
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        if obj.booker == request.user:
+            return True
+        return False

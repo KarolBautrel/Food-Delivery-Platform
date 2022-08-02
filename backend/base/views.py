@@ -14,6 +14,15 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 
+class RetrieveCurrentUserView(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        obj = User.objects.get(id=self.request.user.id)
+        return obj
+
+
 class ListRestaurantsViewset(generics.ListAPIView):
     queryset = Restaurant.objects.all()
     permission_classes = [AllowAny]
@@ -164,3 +173,55 @@ class CommentUpdateView(generics.UpdateAPIView):
 class CommentListView(generics.ListAPIView):
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
+
+
+class BookTableView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            restaurant_id = request.data.get("restaurant", None)
+            tables_quantity = int(request.data.get("tables_quantity", None))
+        except ValueError:
+            return Response({"Message": "Restauran doesnt exist"})
+        print(tables_quantity)
+        restaurant_qs = Restaurant.objects.filter(id=restaurant_id)
+        if restaurant_qs.exists:
+            restaurant = restaurant_qs.first()
+            if restaurant.tables_quantity >= tables_quantity:
+                restaurant.tables_quantity -= tables_quantity
+                restaurant.save()
+                TableBooking.objects.create(
+                    booker=request.user,
+                    restaurant=restaurant,
+                    tables_quantity=tables_quantity,
+                )
+                return Response({"Message": "success"}, status=HTTP_200_OK)
+            else:
+                return Response(
+                    {"Message": "There is no enough tables"}, status=HTTP_200_OK
+                )
+        else:
+            Response(
+                {"Message": "Restaurant does not exist"}, status=HTTP_400_BAD_REQUEST
+            )
+
+
+class FinishTableReservationView(APIView):
+    permission_classes = (TableBookerAllow,)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            table_id = request.data.get("table", None)
+        except ValueError:
+            return Response({"Message": "Restauran doesnt exist"})
+        table_qs = TableBooking.objects.filter(booker=request.user.id, id=table_id)
+        if table_qs.exists():
+            table = table_qs.first()
+            restaurant = Restaurant.objects.get(id=table.restaurant.id)
+            restaurant.tables_quantity += table.tables_quantity
+            restaurant.save()
+            table.delete()
+            return Response({"Message": "success"}, status=HTTP_200_OK)
+        else:
+            Response({"Message": "Table does not exist"}, status=HTTP_400_BAD_REQUEST)
