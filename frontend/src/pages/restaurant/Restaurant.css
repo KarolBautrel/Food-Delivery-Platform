@@ -1,0 +1,11 @@
+.header{
+    margin-left:10%;
+}
+
+.body{
+    display: center;
+    margin-left: 10%;
+}
+.header-list{
+    list-style-type: none;
+}

@@ -8,7 +8,7 @@ export const Searchbar = ({ handleSearch }) => {
       <div className="searchbar-form">
         <label>
           <input
-            placeholder="Search restaurant"
+            placeholder="Search by city"
             value={searchingTerm}
             onChange={(e) => {
               setSearchingTerm(e.target.value);

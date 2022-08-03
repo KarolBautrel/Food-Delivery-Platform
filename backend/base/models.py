@@ -37,6 +37,16 @@ class Restaurant(models.Model):
         availavle_tables = self.tables_quantity - booked_tables_quanity
         return availavle_tables
 
+    def average_rate(self):
+        try:
+            average_rate = sum(i.rate for i in self.comments.all()) / len(
+                self.comments.all()
+            )
+        except ZeroDivisionError:
+            average_rate = 0
+
+        return average_rate
+
 
 class Dish(models.Model):
     name = models.CharField(max_length=25)

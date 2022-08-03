@@ -3,13 +3,15 @@ import useFetch from "../../hooks/useFetch";
 import { RestaurantsList } from "./RestaurantsList";
 import { RecentComments } from "./RecentComments";
 import { Searchbar } from "../../components/Searchbar";
+import { useGeolocation } from "../../hooks/useGeolocation";
 import "./Home.css";
 export default function Home() {
-  const [url, setUrl] = useState("/api/restaurants");
+  // const { city } = useGeolocation(); // getting Current Location
+  const [url, setUrl] = useState(`/api/restaurants`);
   const { data, isLoading, isError } = useFetch(url);
 
-  const handleSearch = (name) => {
-    setUrl(`/api/restaurants?name=${name}`);
+  const handleSearch = (city) => {
+    setUrl(`/api/restaurants?city=${city}`);
   };
 
   if (isError) {

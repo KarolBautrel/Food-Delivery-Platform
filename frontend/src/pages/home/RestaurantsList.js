@@ -1,4 +1,4 @@
-import React from "react";
+import { Link } from "react-router-dom";
 import "./RestaurantsList.css";
 export const RestaurantsList = ({ data, isLoading }) => {
   return (
@@ -10,13 +10,17 @@ export const RestaurantsList = ({ data, isLoading }) => {
           <div className="card" key={data.id}>
             <div className="header">
               <h1>{data.name} </h1>
-              <h4>
-                Tables: {data.available_tables}/{data.tables_quantity}
-              </h4>
+              <h4>Rate: {data.avg_rate}/5</h4>
             </div>
             <h3>
               Address: {data.city}, {data.address}
             </h3>
+            <Link
+              to={`restaurant/${data.id}`}
+              className="button restaurant-details-btn"
+            >
+              See details
+            </Link>
           </div>
         ))
       )}
