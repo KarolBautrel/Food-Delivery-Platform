@@ -161,3 +161,16 @@ SERIALIZERS = {
     "token": "djoser.serializers.TokenSerializer",
     "token_create": "djoser.serializers.TokenCreateSerializer",
 }
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_USE_TLS = True
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = "botfooddelivery@gmail.com"
+EMAIL_HOST_PASSWORD = "jnxlokphwrnvikxr"
+EMAIL_PORT = 587
