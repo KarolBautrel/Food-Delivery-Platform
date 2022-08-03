@@ -13,8 +13,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from django_filters.rest_framework import DjangoFilterBackend
-from tasks import add
-from redis_management import redis_client
+from .tasks import booking_mail_sender
+from datetime import datetime
 
 
 class RetrieveCurrentUserView(generics.RetrieveAPIView):
@@ -84,6 +84,7 @@ class AddToCartView(APIView):
             order = Order.objects.create(user=request.user, ordered_date=ordered_date)
             order.items.add(order_item)
             return Response({"Message": "success"}, status=HTTP_200_OK)
+
         return Response({"Message": "success"}, status=HTTP_200_OK)
 
 
@@ -202,7 +203,9 @@ class BookTableView(APIView):
                     restaurant=restaurant,
                     tables_quantity=tables_quantity,
                 )
-                add.delay(1, 2)
+                booking_mail_sender.delay(
+                    request.user.email, restaurant.name, datetime.now(), tables_quantity
+                )
                 return Response({"Message": "success"}, status=HTTP_200_OK)
             else:
                 return Response(
@@ -231,4 +234,47 @@ class FinishTableReservationView(APIView):
             table.delete()
             return Response({"Message": "success"}, status=HTTP_200_OK)
         else:
-            Response({"Message": "Table does not exist"}, status=HTTP_400_BAD_REQUEST)
+            Response(
+                {"Message": "Table does not exist or youre not a booker"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        return Response(
+            {"Message": "Table does not exist"}, status=HTTP_400_BAD_REQUEST
+        )
+
+
+class ActivateCouponView(APIView):
+    def put(self, request, *args, **kwargs):
+        try:
+            order_id = request.data.get("order", None)
+            coupon_code = request.data.get("coupon", None)
+        except:
+            return Response(
+                {"Message": "You didnt provide correct data"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        try:
+            coupon = Coupon.objects.get(code=coupon_code, is_used=False)
+        except:
+            return Response(
+                {"Message": "Coupon does not exists"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+
+        order_qs = Order.objects.filter(id=order_id)
+        if order_qs.exists():
+            order = order_qs.first()
+            print(order)
+            order.coupon = coupon
+            coupon.is_used = True
+            coupon.save()
+            order.save()
+            return Response(
+                {"Message": "Success"},
+                status=HTTP_200_OK,
+            )
+        else:
+            return Response(
+                {"Message": "Order does not exists"},
+                status=HTTP_400_BAD_REQUEST,
+            )

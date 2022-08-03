@@ -83,6 +83,9 @@ class Order(models.Model):
     )
     start_date = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField()
+    coupon = models.ForeignKey(
+        "Coupon", on_delete=models.SET_NULL, blank=True, null=True
+    )
 
     def __str__(self):
         return f"{self.billing_address} {self.status}"
@@ -91,6 +94,8 @@ class Order(models.Model):
         total = 0
         for order_item in self.items.all():
             total += order_item.get_final_price()
+        if self.coupon:
+            total -= self.coupon.amount
         return total
 
 
@@ -128,3 +133,12 @@ class TableBooking(models.Model):
 
     def __str__(self):
         return f"{self.booker.name} to {self.restaurant.name} on {self.created}"
+
+
+class Coupon(models.Model):
+    code = models.CharField(max_length=15, null=False, blank=True)
+    amount = models.FloatField(null=False, blank=True)
+    is_used = models.BooleanField(null=False, blank=True, default=False)
+
+    def __str__(self):
+        return self.code
