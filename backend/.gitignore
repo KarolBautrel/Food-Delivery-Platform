@@ -23,6 +23,7 @@ yarn-debug.log*
 yarn-error.log*
 
 #env
+*.env
 .env
 .venv
 env/
@@ -31,7 +32,7 @@ ENV/
 env.bak/
 venv.bak/
 __pycache__/
-
+/env_var_folder/*
 migrations
 db.sqlite3
 db

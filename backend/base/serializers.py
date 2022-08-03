@@ -13,6 +13,7 @@ class CommentsSerializer(ModelSerializer):
     restaurant = SerializerMethodField(read_only=True)
 
     class Meta:
+
         model = Comments
         fields = ("restaurant", "body", "rate", "creator", "commented_subject")
 
@@ -27,22 +28,41 @@ class CommentsUpdateSerializer(ModelSerializer):
 
 
 class RestaurantSerializer(ModelSerializer):
+    available_tables = SerializerMethodField()
+    comments = CommentsSerializer(many=True)
+
     class Meta:
         model = Restaurant
-        fields = ["city", "name", "address", "phone_number", "tables_quantity"]
+        fields = (
+            "city",
+            "name",
+            "address",
+            "phone_number",
+            "tables_quantity",
+            "available_tables",
+            "comments",
+        )
+
+    def get_available_tables(self, obj):
+        return obj.available_tables()
 
 
 class DishSerializer(ModelSerializer):
-    restaurant = RestaurantSerializer()
-
     class Meta:
         model = Dish
-        fields = ("id", "price", "name", "restaurant")
+        fields = ("id", "price", "name")
+
+
+class DishDetailSerializer(ModelSerializer):
+    class Meta:
+        model = Dish
+        fields = ("id", "price", "name", "description", "ingredient")
 
 
 class RestaurantDetailSerializer(ModelSerializer):
     dishes = DishSerializer(many=True)
     comments = CommentsSerializer(many=True)
+    available_tables = SerializerMethodField()
 
     class Meta:
         model = Restaurant
@@ -54,7 +74,11 @@ class RestaurantDetailSerializer(ModelSerializer):
             "tables_quantity",
             "dishes",
             "comments",
+            "available_tables",
         ]
+
+    def get_available_tables(self, obj):
+        return obj.available_tables()
 
 
 class OrderItemSerializer(ModelSerializer):

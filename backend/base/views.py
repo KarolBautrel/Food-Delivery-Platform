@@ -41,7 +41,7 @@ class RetrieveRestaurantViewset(generics.RetrieveAPIView):
 
 class DishDetailViewset(generics.RetrieveAPIView):
     queryset = Dish.objects.all()
-    serializer_class = DishSerializer
+    serializer_class = DishDetailSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["name"]
 
@@ -195,9 +195,7 @@ class BookTableView(APIView):
         restaurant_qs = Restaurant.objects.filter(id=restaurant_id)
         if restaurant_qs.exists:
             restaurant = restaurant_qs.first()
-            if restaurant.tables_quantity >= tables_quantity:
-                restaurant.tables_quantity -= tables_quantity
-                restaurant.save()
+            if restaurant.available_tables() >= tables_quantity:
                 TableBooking.objects.create(
                     booker=request.user,
                     restaurant=restaurant,
