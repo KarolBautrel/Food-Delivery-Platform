@@ -259,7 +259,6 @@ class ActivateCouponView(APIView):
         order_qs = Order.objects.filter(id=order_id)
         if order_qs.exists():
             order = order_qs.first()
-            print(order)
             order.coupon = coupon
             coupon.is_used = True
             coupon.save()
