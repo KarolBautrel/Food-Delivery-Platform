@@ -1,0 +1,15 @@
+.home{
+    width: 100%;
+    overflow: hidden; /* add this to contain floated children */
+}
+
+
+.restaurants-container{
+    width: 70%;
+    float:left; /* add this */
+}
+
+.recent-comments-container{
+    width: 30%;
+    float: left; /* add this */
+}

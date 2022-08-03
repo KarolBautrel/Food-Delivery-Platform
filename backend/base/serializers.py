@@ -15,7 +15,7 @@ class CommentsSerializer(ModelSerializer):
     class Meta:
 
         model = Comments
-        fields = ("restaurant", "body", "rate", "creator", "commented_subject")
+        fields = ("id", "restaurant", "body", "rate", "creator", "commented_subject")
 
     def get_restaurant(self, obj):
         return obj.commented_subject.name
@@ -24,7 +24,7 @@ class CommentsSerializer(ModelSerializer):
 class CommentsUpdateSerializer(ModelSerializer):
     class Meta:
         model = Comments
-        fields = ("body", "rate")
+        fields = ("id", "body", "rate")
 
 
 class RestaurantSerializer(ModelSerializer):
@@ -34,6 +34,7 @@ class RestaurantSerializer(ModelSerializer):
     class Meta:
         model = Restaurant
         fields = (
+            "id",
             "city",
             "name",
             "address",
@@ -67,6 +68,7 @@ class RestaurantDetailSerializer(ModelSerializer):
     class Meta:
         model = Restaurant
         fields = [
+            "id",
             "city",
             "name",
             "address",

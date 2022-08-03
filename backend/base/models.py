@@ -33,7 +33,6 @@ class Restaurant(models.Model):
         return self.name
 
     def available_tables(self):
-        print(self.restaurant.all())
         booked_tables_quanity = sum(i.tables_quantity for i in self.restaurant.all())
         availavle_tables = self.tables_quantity - booked_tables_quanity
         return availavle_tables
