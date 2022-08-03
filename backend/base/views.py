@@ -226,9 +226,6 @@ class FinishTableReservationView(APIView):
         table_qs = TableBooking.objects.filter(booker=request.user.id, id=table_id)
         if table_qs.exists():
             table = table_qs.first()
-            restaurant = Restaurant.objects.get(id=table.restaurant.id)
-            restaurant.tables_quantity += table.tables_quantity
-            restaurant.save()
             table.delete()
             return Response({"Message": "success"}, status=HTTP_200_OK)
         else:
