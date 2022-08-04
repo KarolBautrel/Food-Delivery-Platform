@@ -15,6 +15,25 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from django_filters.rest_framework import DjangoFilterBackend
 from .tasks import booking_mail_sender
 from datetime import datetime
+from django.contrib.auth.hashers import check_password
+from rest_framework.authtoken.models import Token
+
+
+class LoginView(APIView):
+    def post(self, request, *args, **kwargs):
+        email = request.data.get("email", None)
+        password = request.data.get("password", None)
+        try:
+            user = User.objects.get(email=email)
+        except:
+            return Response({"Message": "There is no user with this kind of email"})
+        if check_password(password, user.password):
+            token = Token.objects.create(user=user)
+            return Response(
+                {"token": token.key, "email": user.email, "username": user.username}
+            )
+        else:
+            return Response("SOmething went wrong")
 
 
 class RetrieveCurrentUserView(generics.RetrieveAPIView):
