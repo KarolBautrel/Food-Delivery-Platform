@@ -7,7 +7,7 @@ export const Login = () => {
     email: "",
     password: "",
   });
-  const [loginCredentials, setLoginCredentials] = useState([]);
+  const [data, setData] = useState({});
   const redirect = useNavigate();
   const dispatch = useDispatch();
   const handleChange = (e) => {
@@ -19,23 +19,33 @@ export const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: login.email, password: login.password }),
-    });
-    const data = await response.json();
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: login.email, password: login.password }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setData(data);
+        dispatch(
+          getLoggedUserData({
+            name: data.username,
+            email: data.email,
+            token: data.token,
+            id: data.id,
+          })
+        );
 
-    dispatch(
-      getLoggedUserData({
-        name: data.username,
-        email: data.email,
-        token: data.token,
-      })
-    );
-    setLoginCredentials({ ...data });
-
-    window.localStorage.setItem("AUTH_CREDENTIALS", JSON.stringify(data));
+        window.localStorage.setItem("AUTH_CREDENTIALS", JSON.stringify(data));
+        redirect("/");
+      } else {
+        throw new Error("Provided credentials are not correct");
+      }
+    } catch (err) {
+      console.log(err);
+      alert(err);
+    }
   };
 
   const loginForm = [

@@ -11,7 +11,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_404_NOT_FOUND,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
 from django_filters.rest_framework import DjangoFilterBackend
 from .tasks import booking_mail_sender
 from datetime import datetime
@@ -26,14 +30,31 @@ class LoginView(APIView):
         try:
             user = User.objects.get(email=email)
         except:
-            return Response({"Message": "There is no user with this kind of email"})
-        if check_password(password, user.password):
-            token = Token.objects.create(user=user)
             return Response(
-                {"token": token.key, "email": user.email, "username": user.username}
+                {"Message": "There is no user with this kind of email"},
+                status=HTTP_404_NOT_FOUND,
             )
+        if check_password(password, user.password):
+            try:
+                token = Token.objects.get(user=user)
+                token.delete()
+                token = Token.objects.create(user=user)
+                return Response(
+                    {"token": token.key, "email": user.email, "username": user.username}
+                )
+            except:
+                token = Token.objects.create(user=user)
+                return Response(
+                    {
+                        "token": token.key,
+                        "email": user.email,
+                        "username": user.username,
+                        "id": user.id,
+                    }
+                )
+
         else:
-            return Response("SOmething went wrong")
+            return Response("SOmething went wrong", status=HTTP_404_NOT_FOUND)
 
 
 class RetrieveCurrentUserView(generics.RetrieveAPIView):
