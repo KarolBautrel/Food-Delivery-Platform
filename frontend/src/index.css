@@ -1,5 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800&display=swap');
-
+@import '@fontsource/roboto/300.css';
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
 /* base styles */
 html, body, #root {
   height: 100%;
@@ -82,3 +84,4 @@ input, textarea {
 .button:focus {
   background-color: #6393b3;
 }
+

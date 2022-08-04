@@ -28,6 +28,8 @@ class Restaurant(models.Model):
     address = models.CharField(max_length=45)
     phone_number = models.IntegerField()
     tables_quantity = models.IntegerField()
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
 
     def __str__(self):
         return self.name

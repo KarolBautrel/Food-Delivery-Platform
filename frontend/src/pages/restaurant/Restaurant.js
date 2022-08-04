@@ -1,4 +1,4 @@
-import { useParams, useHistory } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import { DishesList } from "./DishesList";
 import { RestaurantDetails } from "./RestaurantDetails";

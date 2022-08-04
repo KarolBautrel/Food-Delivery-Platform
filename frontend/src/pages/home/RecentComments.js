@@ -11,7 +11,7 @@ export const RecentComments = () => {
       ) : (
         data.slice(0, 3).map((data) => (
           <div key={data.id} className="comment-card">
-            <div className="header">
+            <div className="recent-comments-header">
               <h3>
                 {" "}
                 {data.creator.name} on {data.restaurant}:

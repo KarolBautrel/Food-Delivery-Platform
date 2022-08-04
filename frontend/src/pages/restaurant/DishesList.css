@@ -1,0 +1,11 @@
+.meal-card-header {
+    display: flex;
+    justify-content: space-between;
+}
+.meal-card-header h3{
+margin-bottom:5px;
+}
+.meal-card-header button{
+    margin-bottom:5px;
+    }
+

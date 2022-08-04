@@ -84,6 +84,8 @@ class RestaurantDetailSerializer(ModelSerializer):
             "comments",
             "available_tables",
             "avg_rate",
+            "latitude",
+            "longitude",
         ]
 
     def get_available_tables(self, obj):
