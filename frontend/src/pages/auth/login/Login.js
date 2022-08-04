@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getLoggedUserData } from "../../../redux/auth";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +7,7 @@ export const Login = () => {
     email: "",
     password: "",
   });
+  const [loginCredentials, setLoginCredentials] = useState([]);
   const redirect = useNavigate();
   const dispatch = useDispatch();
   const handleChange = (e) => {
@@ -32,7 +33,9 @@ export const Login = () => {
         token: data.token,
       })
     );
-    redirect("/");
+    setLoginCredentials({ ...data });
+
+    window.localStorage.setItem("AUTH_CREDENTIALS", JSON.stringify(data));
   };
 
   const loginForm = [
