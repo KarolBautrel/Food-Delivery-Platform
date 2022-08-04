@@ -5,15 +5,10 @@ import Col from "react-bootstrap/Col";
 import { MapComponent } from "../../components/MapComponent";
 export const RestaurantDetails = ({ data }) => {
   return (
-    <Container>
+    <Container style={{ marginTop: "25px" }}>
       <Row>
         <Col>
           <h1>{data.name}</h1>
-        </Col>
-        <Col>
-          <MapComponent data={data} />
-        </Col>
-        <Col>
           <h3>
             <ul className="header-list">
               <li>
@@ -22,12 +17,18 @@ export const RestaurantDetails = ({ data }) => {
               <li> Rate : {data.avg_rate}</li>
             </ul>
           </h3>
+          <div>
+            <h2>Address: {data.address}</h2>
+            <h2>Phone number: {data.phone_number}</h2>
+          </div>
+        </Col>
+        <Col>
+          <MapComponent data={data} />
         </Col>
       </Row>
-      <div className="body">
-        <h2>Address: {data.address}</h2>
-        <h2>Phone number: {data.phone_number}</h2>
-      </div>
+      <Row>
+        <Col></Col>
+      </Row>
     </Container>
   );
 };

@@ -15,11 +15,8 @@ export const RestaurantsList = ({ data, isLoading }) => {
             <h3>
               Address: {data.city}, {data.address}
             </h3>
-            <Link
-              to={`restaurant/${data.id}`}
-              className="button restaurant-details-btn"
-            >
-              See details
+            <Link to={`restaurant/${data.id}`}>
+              <button className="button"> See details</button>
             </Link>
           </div>
         ))
