@@ -30,6 +30,7 @@ class CommentsUpdateSerializer(ModelSerializer):
 class RestaurantSerializer(ModelSerializer):
     available_tables = SerializerMethodField()
     comments = CommentsSerializer(many=True)
+    avg_rate = SerializerMethodField()
 
     class Meta:
         model = Restaurant
@@ -42,16 +43,20 @@ class RestaurantSerializer(ModelSerializer):
             "tables_quantity",
             "available_tables",
             "comments",
+            "avg_rate",
         )
 
     def get_available_tables(self, obj):
         return obj.available_tables()
 
+    def get_avg_rate(self, obj):
+        return obj.average_rate()
+
 
 class DishSerializer(ModelSerializer):
     class Meta:
         model = Dish
-        fields = ("id", "price", "name")
+        fields = ("id", "price", "name", "ingredient")
 
 
 class DishDetailSerializer(ModelSerializer):
@@ -64,6 +69,7 @@ class RestaurantDetailSerializer(ModelSerializer):
     dishes = DishSerializer(many=True)
     comments = CommentsSerializer(many=True)
     available_tables = SerializerMethodField()
+    avg_rate = SerializerMethodField()
 
     class Meta:
         model = Restaurant
@@ -77,10 +83,16 @@ class RestaurantDetailSerializer(ModelSerializer):
             "dishes",
             "comments",
             "available_tables",
+            "avg_rate",
+            "latitude",
+            "longitude",
         ]
 
     def get_available_tables(self, obj):
         return obj.available_tables()
+
+    def get_avg_rate(self, obj):
+        return obj.average_rate()
 
 
 class OrderItemSerializer(ModelSerializer):

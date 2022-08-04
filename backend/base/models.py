@@ -28,6 +28,8 @@ class Restaurant(models.Model):
     address = models.CharField(max_length=45)
     phone_number = models.IntegerField()
     tables_quantity = models.IntegerField()
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -36,6 +38,16 @@ class Restaurant(models.Model):
         booked_tables_quanity = sum(i.tables_quantity for i in self.restaurant.all())
         availavle_tables = self.tables_quantity - booked_tables_quanity
         return availavle_tables
+
+    def average_rate(self):
+        try:
+            average_rate = sum(i.rate for i in self.comments.all()) / len(
+                self.comments.all()
+            )
+        except ZeroDivisionError:
+            average_rate = 0
+
+        return average_rate
 
 
 class Dish(models.Model):
