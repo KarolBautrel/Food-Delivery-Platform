@@ -2,9 +2,9 @@ import React from "react";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import { MapComponent } from "../../components/MapComponent";
-import Modal from "../../components/Modal";
-import { RestaurantBook } from "./RestaurantBook";
+
+import { MapComponent } from "../../../components/MapComponent";
+
 export const RestaurantDetails = ({ data }) => {
   return (
     <Container style={{ marginTop: "25px" }}>

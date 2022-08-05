@@ -1,9 +1,9 @@
 import { useParams } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import { DishesList } from "./DishesList";
-import { RestaurantDetails } from "./RestaurantDetails";
-import { RestaurantComments } from "./RestaurantComments";
-import { RestaurantBook } from "./RestaurantBook";
+import { RestaurantDetails } from "./restaurantDashboard/RestaurantDetails";
+import { RestaurantComments } from "./comments/RestaurantComments";
+import { RestaurantBook } from "./restaurantDashboard/RestaurantBook";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import "./Restaurant.css";
@@ -32,7 +32,7 @@ export const Restaurant = () => {
             onClick={popUpModal}
             className="button"
           >
-            Get Table !
+            Book Table !
           </button>
           <DishesList data={data} />
           <RestaurantComments data={data} />
