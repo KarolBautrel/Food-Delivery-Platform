@@ -22,7 +22,7 @@ function CommentForm({ data }) {
         }),
       });
       if (resp.ok) {
-        console.log("Siema");
+        alert("Comment added");
       } else {
         throw new Error("something went wrong");
       }
