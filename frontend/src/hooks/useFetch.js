@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react";
 
-export default function useFetch(url) {
+export default function useFetch(url, token = null) {
   const [data, setData] = useState([]);
   const [status, setStatus] = useState("idle");
-
-  const getData = async () => {
+  console.log(url);
+  const getData = async (fetchURL) => {
     try {
+      let res;
       setStatus("pending");
-      const res = await fetch(url);
+      if (token === null) {
+        res = await fetch(fetchURL);
+      } else {
+        res = await fetch(fetchURL, {
+          method: "GET",
+          headers: { Authorization: `Token ${token}` },
+        });
+      }
       const data = await res.json();
       setData(data);
       setStatus("approved");
@@ -18,7 +26,7 @@ export default function useFetch(url) {
   };
 
   useEffect(() => {
-    getData();
+    getData(url);
   }, [url]);
 
   return {

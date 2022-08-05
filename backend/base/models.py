@@ -147,6 +147,7 @@ class TableBooking(models.Model):
     )
     tables_quantity = models.IntegerField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
+    booking_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.booker.name} to {self.restaurant.name} on {self.created}"

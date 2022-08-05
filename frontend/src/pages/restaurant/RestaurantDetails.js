@@ -3,6 +3,8 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { MapComponent } from "../../components/MapComponent";
+import Modal from "../../components/Modal";
+import { RestaurantBook } from "./RestaurantBook";
 export const RestaurantDetails = ({ data }) => {
   return (
     <Container style={{ marginTop: "25px" }}>
@@ -26,9 +28,7 @@ export const RestaurantDetails = ({ data }) => {
           <MapComponent data={data} />
         </Col>
       </Row>
-      <Row>
-        <Col></Col>
-      </Row>
+      <Row></Row>
     </Container>
   );
 };

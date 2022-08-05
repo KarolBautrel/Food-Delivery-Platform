@@ -27,7 +27,6 @@ export const Login = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setData(data);
         dispatch(
           getLoggedUserData({
             name: data.username,

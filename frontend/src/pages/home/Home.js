@@ -5,7 +5,6 @@ import { RestaurantsList } from "./RestaurantsList";
 import { RecentComments } from "./RecentComments";
 import { Searchbar } from "../../components/Searchbar";
 import { getLoggedUserData } from "../../redux/auth";
-
 import "./Home.css";
 export default function Home() {
   // const { city } = useGeolocation(); // getting Current Location

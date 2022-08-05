@@ -52,7 +52,7 @@ function Signup() {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleClick = async (e) => {
     e.preventDefault();
     try {
       const resp = await fetch("/api/users/", {
@@ -88,7 +88,7 @@ function Signup() {
         <button
           style={{ width: "10%", marginLeft: "44%", marginTop: "15px" }}
           className="button"
-          onClick={handleSubmit}
+          onClick={handleClick}
         >
           Sign up!
         </button>
