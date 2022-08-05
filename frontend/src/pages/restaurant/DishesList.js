@@ -6,7 +6,7 @@ export const DishesList = ({ data }) => {
     <div>
       <div className="justify-content-around">
         {data.dishes.map((dish) => (
-          <Card style={{ width: "50rem", marginLeft: "25%" }}>
+          <Card key={dish.id} style={{ width: "50rem", marginLeft: "25%" }}>
             <Card.Img
               style={{ marginLeft: "35%" }}
               variant="top"
@@ -24,6 +24,7 @@ export const DishesList = ({ data }) => {
           </Card>
         ))}
       </div>
+      <hr />
     </div>
   );
 };

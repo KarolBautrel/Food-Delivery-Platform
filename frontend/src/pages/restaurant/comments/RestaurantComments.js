@@ -12,26 +12,27 @@ export const RestaurantComments = ({ data }) => {
   return (
     <>
       <Row>
+        <h1 style={{ marginLeft: "40%" }}>Comments</h1>
         <Col>
-          <h3 style={{ marginLeft: "20%" }}>Comments</h3>
           {data.comments.map((comment) => (
-            <div
-              className="card"
-              style={{ width: "60%", marginLeft: "20%" }}
-              key={comment.id}
-            >
-              <div>
-                <h2>{comment.creator.name}</h2>
-                <h3>Rate: {comment.rate} </h3>
+            <div key={comment.id}>
+              <h4 style={{ marginLeft: "40%" }}>{comment.creator.name} said</h4>
+              <div
+                className="card"
+                style={{ width: "60%", marginLeft: "20%", marginTop: "5px" }}
+              >
+                <div>
+                  <h4>Rate: {comment.rate} </h4>
+                </div>
+                <h5>{comment.body}</h5>
               </div>
-              <h3>{comment.body}</h3>
             </div>
           ))}
         </Col>
         <Col>
           {token && (
             <div>
-              <CommentForm />
+              <CommentForm data={data} />
             </div>
           )}
         </Col>
