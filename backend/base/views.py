@@ -11,10 +11,52 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_404_NOT_FOUND,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+    HTTP_400_BAD_REQUEST,
+)
 from django_filters.rest_framework import DjangoFilterBackend
 from .tasks import booking_mail_sender
 from datetime import datetime
+from django.contrib.auth.hashers import check_password
+from rest_framework.authtoken.models import Token
+from django.db import models
+
+
+class LoginView(APIView):
+    def post(self, request, *args, **kwargs):
+        email = request.data.get("email", None)
+        password = request.data.get("password", None)
+        try:
+            user = User.objects.get(email=email)
+        except:
+            return Response(
+                {"Message": "There is no user with this kind of email"},
+                status=HTTP_404_NOT_FOUND,
+            )
+        if check_password(password, user.password):
+            try:
+                token = Token.objects.get(user=user)
+                token.delete()
+                token = Token.objects.create(user=user)
+                return Response(
+                    {"token": token.key, "email": user.email, "username": user.username}
+                )
+            except:
+                token = Token.objects.create(user=user)
+                return Response(
+                    {
+                        "token": token.key,
+                        "email": user.email,
+                        "username": user.username,
+                        "id": user.id,
+                    }
+                )
+
+        else:
+            return Response("SOmething went wrong", status=HTTP_404_NOT_FOUND)
 
 
 class RetrieveCurrentUserView(generics.RetrieveAPIView):
@@ -190,16 +232,21 @@ class BookTableView(APIView):
         try:
             restaurant_id = request.data.get("restaurant", None)
             tables_quantity = int(request.data.get("tables_quantity", None))
+            date = request.data.get("date", None)
+            print(restaurant_id, tables_quantity, date)
         except ValueError:
             return Response({"Message": "Restauran doesnt exist"})
+        date = models.DateField().to_python(date)
         restaurant_qs = Restaurant.objects.filter(id=restaurant_id)
         if restaurant_qs.exists:
             restaurant = restaurant_qs.first()
+            print(restaurant)
             if restaurant.available_tables() >= tables_quantity:
                 TableBooking.objects.create(
                     booker=request.user,
                     restaurant=restaurant,
                     tables_quantity=tables_quantity,
+                    booking_date=date,
                 )
                 booking_mail_sender.delay(
                     request.user.email, restaurant.name, datetime.now(), tables_quantity

@@ -1,7 +1,29 @@
 import React from "react";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-export const MealCard = ({ data }) => {
+import { useNavigate } from "react-router-dom";
+export const MealCard = ({ data, token }) => {
+  const redirect = useNavigate();
+  const handleClick = async (id) => {
+    try {
+      const response = await fetch("/api/cart/add-to-cart", {
+        method: "POST",
+        headers: {
+          Authorization: `Token ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ product: id }),
+      });
+      if (response.ok) {
+        redirect("/cart");
+      } else {
+        throw new Error("Something went wrong");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Row className="card">
       <Col>
@@ -13,7 +35,14 @@ export const MealCard = ({ data }) => {
           </Col>
           <Col>
             <h4>Price: {data.price} PLN</h4>
-            <button className="button">Add to cart</button>
+            <button
+              onClick={() => {
+                handleClick(data.id);
+              }}
+              className="button"
+            >
+              Add to cart
+            </button>
           </Col>
         </Row>
       </Col>

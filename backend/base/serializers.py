@@ -54,9 +54,11 @@ class RestaurantSerializer(ModelSerializer):
 
 
 class DishSerializer(ModelSerializer):
+    restaurant = StringRelatedField()
+
     class Meta:
         model = Dish
-        fields = ("id", "price", "name", "ingredient")
+        fields = ("id", "price", "name", "ingredient", "restaurant")
 
 
 class DishDetailSerializer(ModelSerializer):
