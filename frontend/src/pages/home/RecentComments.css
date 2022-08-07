@@ -1,0 +1,24 @@
+.comment-card{
+     background: #fff;
+  color: #333;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  width:80%;
+  margin-left:0;
+  margin-top:5px
+}
+
+.recent-comments-header {
+  display: flex;
+  justify-content: space-between;
+}
+.recent-comments-header h2{
+margin-bottom:5px;
+}
+.recent-comments-header-comments-headerder h3{
+  margin-bottom:5px;
+  }
+

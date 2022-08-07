@@ -1,0 +1,11 @@
+.restaurant-card-header {
+    display: flex;
+    justify-content: space-between;
+}
+.restaurant-card-header h3{
+margin-bottom:5px;
+}
+.restaurant-card-header h4{
+    margin-bottom:5px;
+    }
+

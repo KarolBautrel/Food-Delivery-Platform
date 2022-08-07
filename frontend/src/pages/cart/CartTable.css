@@ -1,0 +1,13 @@
+.cart-table{
+    width:100%;
+    
+}
+
+.quantity{
+    display:flex;
+}
+
+.clicker:hover{
+    cursor: pointer;
+
+}
