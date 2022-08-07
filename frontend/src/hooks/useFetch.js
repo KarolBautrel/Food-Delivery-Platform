@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 export default function useFetch(url, token = null) {
   const [data, setData] = useState([]);
   const [status, setStatus] = useState("idle");
-  console.log(url);
   const getData = async (fetchURL) => {
     try {
       let res;

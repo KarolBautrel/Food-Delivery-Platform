@@ -3,9 +3,14 @@ from .models import *
 
 
 class UserSerializer(ModelSerializer):
+    booked_tables = SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ("id", "name", "email")
+        fields = ("id", "name", "email", "username", "booked_tables")
+
+    def get_booked_tables(self, obj):
+        return obj.get_booked_tables()
 
 
 class CommentsSerializer(ModelSerializer):

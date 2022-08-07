@@ -3,7 +3,7 @@ import Form from "react-bootstrap/Form";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 
-function CommentForm({ data }) {
+function CommentForm({ data, handleRefresh }) {
   const [comment, setComment] = useState("");
   const { token } = useSelector((state) => state.auth);
   const [rate, setRate] = useState("");
@@ -22,7 +22,7 @@ function CommentForm({ data }) {
         }),
       });
       if (resp.ok) {
-        alert("Comment added");
+        handleRefresh();
       } else {
         throw new Error("something went wrong");
       }
@@ -30,7 +30,6 @@ function CommentForm({ data }) {
       alert(error);
     }
   };
-  console.log(rate);
   return (
     <>
       <h3>Leave opinion below</h3>
@@ -64,7 +63,12 @@ function CommentForm({ data }) {
           }}
         />
 
-        <button onClick={handleClick} className="button">
+        <button
+          onClick={() => {
+            handleClick();
+          }}
+          className="button"
+        >
           Add comment
         </button>
       </FloatingLabel>

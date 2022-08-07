@@ -1,39 +1,73 @@
 import { useEffect, useState, useCallback } from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import { BiPlus, BiMinus } from "react-icons/bi";
 import "./CartTable.css";
 
 export const CartTable = ({ data, isLoading, token, handleRefresh }) => {
-  const handleDecreaseQuantity = (id) => {
-    fetch("api/order-summary/update-quantity", {
-      method: "POST",
-      headers: {
-        Authorization: `Token ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ product: id }),
-    });
+  console.log(data);
+  const [tableData, setTableData] = useState([]);
+  useEffect(() => {
+    setTableData(data);
+  }, [data]);
+  console.log(tableData);
+  const handleDecreaseQuantity = async (id) => {
+    try {
+      const response = await fetch("api/order-summary/update-quantity", {
+        method: "POST",
+        headers: {
+          Authorization: `Token ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ product: id }),
+      });
+      if (response.ok) {
+        handleRefresh();
+      } else {
+        throw new Error("Something went wrong");
+      }
+    } catch (error) {
+      alert(error);
+    }
   };
 
-  const handleIncreaseQuantity = (id) => {
-    console.log(id);
-    fetch("api/cart/add-to-cart", {
-      method: "POST",
-      headers: {
-        Authorization: `Token ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ product: id }),
-    });
+  const handleIncreaseQuantity = async (id) => {
+    try {
+      const response = await fetch("api/cart/add-to-cart", {
+        method: "POST",
+        headers: {
+          Authorization: `Token ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ product: id }),
+      });
+      if (response.ok) {
+        handleRefresh();
+      } else {
+        throw new Error("Something went wrong");
+      }
+    } catch (error) {
+      alert(error);
+    }
   };
 
-  const displayDecreaseQuantity = (e) => {
-    console.log(e, "tutaj");
-  };
+  async function handleRefresh() {
+    try {
+      const resp = await fetch("api/cart", {
+        method: "GET",
+        headers: { Authorization: `Token ${token}` },
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        setTableData(data);
+      } else {
+        throw new Error("Something went wrong during refresh");
+      }
+    } catch (error) {
+      alert(error);
+    }
+  }
   return (
     <div>
       {isLoading ? (
@@ -50,7 +84,7 @@ export const CartTable = ({ data, isLoading, token, handleRefresh }) => {
               </tr>
             </thead>
             <tbody>
-              {data.map((order) => (
+              {tableData.map((order) => (
                 <tr key={order.id}>
                   <td>{order.item.name}</td>
                   <td>{order.item.restaurant}</td>

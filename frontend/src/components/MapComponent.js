@@ -2,7 +2,6 @@ import React from "react";
 import { MapContainer, TileLayer, useMap, Marker, Popup } from "react-leaflet";
 
 export const MapComponent = ({ data }) => {
-  console.log(data);
   const coords = [data.latitude, data.longitude];
 
   return (

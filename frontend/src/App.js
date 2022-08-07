@@ -8,7 +8,9 @@ import { Login } from "./pages/auth/login/Login";
 import { Meal } from "./pages/meal/Meal";
 import { Restaurant } from "./pages/restaurant/Restaurant";
 import { User } from "./pages/user/User";
+import { LoggedUser } from "./pages/user/loggedUser/LoggedUser";
 import { Cart } from "./pages/cart/Cart";
+
 import { SessionHandler } from "./utilities/SessionHandler";
 function App() {
   return (
@@ -23,7 +25,7 @@ function App() {
             <Route path="/meal/:id" element={<Meal />} />
             <Route path="/restaurant/:id" element={<Restaurant />} />
             <Route path="/user/:id" element={<User />} />
-            <Route path="/user/me" element={<User />} />
+            <Route path="/user/me" element={<LoggedUser />} />
             <Route path="/cart/" element={<Cart />} />
           </Routes>
         </BrowserRouter>

@@ -21,6 +21,13 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+    def get_booked_tables(self):
+        booked_tables = [
+            (i.restaurant.name, i.booking_date, i.tables_quantity, i.id)
+            for i in self.booker.all()
+        ]
+        return booked_tables
+
 
 class Restaurant(models.Model):
     city = models.CharField(max_length=30, null=True, blank=True)
@@ -77,6 +84,9 @@ class OrderItem(models.Model):
 
     def get_final_price(self):
         return self.get_total_item_price()
+
+    class Meta:
+        ordering = ["id"]
 
 
 class Order(models.Model):

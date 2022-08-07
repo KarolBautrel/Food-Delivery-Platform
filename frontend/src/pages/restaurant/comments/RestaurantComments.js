@@ -1,14 +1,15 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import "./RestaurantComments.css";
 import { useSelector } from "react-redux";
 import CommentForm from "./CommentForm";
-import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 
-export const RestaurantComments = ({ data }) => {
-  const { token, id } = useSelector((state) => state.auth);
+export const RestaurantComments = ({ data, RestaurantId }) => {
+  const { token } = useSelector((state) => state.auth);
+  const [commentsData, setCommentsData] = useState(data);
+  const authData = JSON.parse(window.localStorage.getItem("AUTH_CREDENTIALS"));
 
   const handleDelete = async (id) => {
     try {
@@ -17,7 +18,7 @@ export const RestaurantComments = ({ data }) => {
         headers: { Authorization: `Token ${token}` },
       });
       if (resp.ok) {
-        alert("Comment deleted");
+        handleRefresh();
       } else {
         throw new Error("something went wrong");
       }
@@ -26,12 +27,26 @@ export const RestaurantComments = ({ data }) => {
     }
   };
 
+  async function handleRefresh() {
+    try {
+      const resp = await fetch(`/api/restaurant/${RestaurantId}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        setCommentsData(data);
+      } else {
+        throw new Error("Something went wrong");
+      }
+    } catch (error) {
+      alert(error);
+    }
+  }
+
   return (
     <>
       <Row>
         <h1 style={{ marginLeft: "40%" }}>Comments</h1>
         <Col>
-          {data.comments.map((comment) => (
+          {commentsData.comments.map((comment) => (
             <div key={comment.id}>
               <h4 style={{ marginLeft: "40%" }}>{comment.creator.name} said</h4>
               <div
@@ -43,7 +58,7 @@ export const RestaurantComments = ({ data }) => {
                 </div>
                 <h5>{comment.body}</h5>
               </div>
-              {id == comment.creator.id ? (
+              {authData && authData.id == comment.creator.id ? (
                 <Button
                   style={{ marginLeft: "20%", marginTop: "5px" }}
                   variant="danger"
@@ -62,7 +77,7 @@ export const RestaurantComments = ({ data }) => {
         <Col>
           {token && (
             <div>
-              <CommentForm data={data} />
+              <CommentForm data={commentsData} handleRefresh={handleRefresh} />
             </div>
           )}
         </Col>

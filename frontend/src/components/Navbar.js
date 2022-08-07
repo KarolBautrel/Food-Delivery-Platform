@@ -25,7 +25,7 @@ export const Navbar = () => {
           </>
         ) : (
           <>
-            <Link className="navbar-buttons" to="/profile">
+            <Link className="navbar-buttons" to="/user/me">
               My profile
             </Link>
             <Link className="navbar-buttons" to="/cart">

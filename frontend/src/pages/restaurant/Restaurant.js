@@ -12,6 +12,7 @@ export const Restaurant = () => {
   const { data, isLoading, isError } = useFetch(`/api/restaurant/${id}`);
   const [showModal, setShowModal] = useState(false);
   const { token } = useSelector((state) => state.auth);
+
   if (isError) {
     return <div>An error occured during connection</div>;
   }
@@ -35,7 +36,7 @@ export const Restaurant = () => {
             Book Table !
           </button>
           <DishesList data={data} />
-          <RestaurantComments data={data} />
+          <RestaurantComments data={data} RestaurantId={id} />
         </div>
       )}
     </div>
