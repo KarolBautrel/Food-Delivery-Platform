@@ -1,18 +1,23 @@
 import { useEffect, useState, useCallback } from "react";
+import useFetch from "../../hooks/useFetch";
 
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import { BiPlus, BiMinus } from "react-icons/bi";
 import "./CartTable.css";
 
-export const CartTable = ({ data, isLoading, token, handleRefresh }) => {
-  console.log(data);
+export const CartTable = ({ token }) => {
+  const [url, setUrl] = useState("/api/cart");
+  const { data, isLoading, isError } = useFetch(url, token);
+
+  window.localStorage.setItem("CART", JSON.stringify(data));
+  const localStorageData = JSON.parse(window.localStorage.getItem("CART"));
   const [tableData, setTableData] = useState([]);
   useEffect(() => {
-    setTableData(data);
+    setTableData(localStorageData);
   }, [data]);
-  console.log(tableData);
-  const handleDecreaseQuantity = async (id) => {
+
+  const handleDecreaseQuantity = async (id, orderId) => {
     try {
       const response = await fetch("api/order-summary/update-quantity", {
         method: "POST",
@@ -23,7 +28,9 @@ export const CartTable = ({ data, isLoading, token, handleRefresh }) => {
         body: JSON.stringify({ product: id }),
       });
       if (response.ok) {
-        handleRefresh();
+        const data = await response.json();
+        console.log(data);
+        handleRefresh(data);
       } else {
         throw new Error("Something went wrong");
       }
@@ -32,7 +39,7 @@ export const CartTable = ({ data, isLoading, token, handleRefresh }) => {
     }
   };
 
-  const handleIncreaseQuantity = async (id) => {
+  const handleIncreaseQuantity = async (id, orderId) => {
     try {
       const response = await fetch("api/cart/add-to-cart", {
         method: "POST",
@@ -43,7 +50,8 @@ export const CartTable = ({ data, isLoading, token, handleRefresh }) => {
         body: JSON.stringify({ product: id }),
       });
       if (response.ok) {
-        handleRefresh();
+        const data = await response.json();
+        handleRefresh(data);
       } else {
         throw new Error("Something went wrong");
       }
@@ -52,18 +60,32 @@ export const CartTable = ({ data, isLoading, token, handleRefresh }) => {
     }
   };
 
-  async function handleRefresh() {
+  const onDelete = async (id) => {
+    const response = await fetch("api/cart/remove-item", {
+      method: "DELETE",
+      headers: {
+        Authorization: `Token ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ order: id }),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setTableData(data);
+    }
+  };
+
+  function handleRefresh(data) {
     try {
-      const resp = await fetch("api/cart", {
-        method: "GET",
-        headers: { Authorization: `Token ${token}` },
-      });
-      if (resp.ok) {
-        const data = await resp.json();
-        setTableData(data);
-      } else {
-        throw new Error("Something went wrong during refresh");
-      }
+      setTableData((prevData) =>
+        prevData.map((orderItem) =>
+          orderItem.id === data.id
+            ? {
+                ...data,
+              }
+            : orderItem
+        )
+      );
     } catch (error) {
       alert(error);
     }
@@ -81,35 +103,50 @@ export const CartTable = ({ data, isLoading, token, handleRefresh }) => {
                 <th>Restaurant</th>
                 <th>Quantity</th>
                 <th>Price</th>
+                <th>Delete</th>
               </tr>
             </thead>
             <tbody>
-              {tableData.map((order) => (
+              {tableData.map((order, index) => (
                 <tr key={order.id}>
                   <td>{order.item.name}</td>
                   <td>{order.item.restaurant}</td>
                   <td className="quantity">
-                    <BiMinus
-                      className="clicker"
-                      style={{ marginTop: "6px" }}
-                      onClick={(e) => {
-                        handleDecreaseQuantity(order.item.id);
-                      }}
-                    >
-                      -
-                    </BiMinus>
+                    {order.quantity !== 1 ? (
+                      <BiMinus
+                        className="clicker"
+                        style={{ marginTop: "6px" }}
+                        onClick={() => {
+                          handleDecreaseQuantity(order.item.id, order.id);
+                        }}
+                      >
+                        -
+                      </BiMinus>
+                    ) : (
+                      <> </>
+                    )}
                     <h5> {order.quantity} </h5>
                     <BiPlus
                       className="clicker"
                       style={{ marginTop: "5px" }}
-                      onClick={(e) => {
-                        handleIncreaseQuantity(order.item.id);
+                      onClick={() => {
+                        handleIncreaseQuantity(order.item.id, order.id);
                       }}
                     >
                       +
                     </BiPlus>
                   </td>
                   <th>{order.final_price}</th>
+                  <td>
+                    <Button
+                      onClick={() => {
+                        onDelete(order.id);
+                      }}
+                      variant="danger"
+                    >
+                      Delete{" "}
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>

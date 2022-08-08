@@ -68,6 +68,12 @@ class RetrieveCurrentUserView(generics.RetrieveAPIView):
         return obj
 
 
+class UserChangeEmailView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (RequestUserAllowed,)
+    serializer_class = EmailChangeSerializer
+
+
 class ListRestaurantsViewset(generics.ListAPIView):
     queryset = Restaurant.objects.all()
     permission_classes = [AllowAny]
@@ -110,24 +116,28 @@ class AddToCartView(APIView):
             order_item = order_item_qs.first()
             order_item.quantity += 1
             order_item.save()
+            serializer = OrderItemSerializer(order_item)
         else:
             order_item = OrderItem.objects.create(
                 item=item, user=request.user, ordered=False
             )
             order_item.save()
+            serializer = OrderItemSerializer(order_item)
         order_qs = Order.objects.filter(user=request.user, ordered=False)
         if order_qs.exists():
             order = order_qs[0]
             if not order.items.filter(item__id=order_item.id).exists():
                 order.items.add(order_item)
-                return Response({"Message": "success"}, status=HTTP_200_OK)
+
+                return Response(serializer.data, status=HTTP_200_OK)
         else:
             ordered_date = timezone.now()
             order = Order.objects.create(user=request.user, ordered_date=ordered_date)
             order.items.add(order_item)
-            return Response({"Message": "success"}, status=HTTP_200_OK)
+            serializer = OrderItemSerializer(order)
+            return Response(serializer.data, status=HTTP_200_OK)
 
-        return Response({"Message": "success"}, status=HTTP_200_OK)
+        return Response(order, status=HTTP_200_OK)
 
 
 class UpdateOrderQuantity(APIView):
@@ -154,10 +164,14 @@ class UpdateOrderQuantity(APIView):
                 if order_item.quantity > 1:
                     order_item.quantity -= 1
                     order_item.save()
+                    serializer = OrderItemSerializer(order_item)
+                    return Response(serializer.data, status=HTTP_200_OK)
                 else:
                     order.items.remove(order_item)
                     order_item.delete()
-                return Response(status=HTTP_200_OK)
+                    serializer = OrderItemSerializer(order_item)
+                return Response(serializer.data, status=HTTP_200_OK)
+
             else:
                 return Response(
                     {"message": "This item was not in your cart"},
@@ -169,6 +183,25 @@ class UpdateOrderQuantity(APIView):
                 {"message": "You do not have an active order"},
                 status=HTTP_400_BAD_REQUEST,
             )
+
+
+class RemoveProductFromCartView(APIView):
+    permission_classes = (IsAuthenticated, RequestUserAllowed)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            order_item_id = request.data.get("order", None)
+        except:
+            return Response({"Message": "There is no order with this id"})
+        try:
+            order_item = OrderItem.objects.get(id=order_item_id)
+        except:
+            return Response({"Message": "There is no order with this id"})
+        order_item.delete()
+        serializer = OrderItemSerializer(
+            OrderItem.objects.filter(user=request.user), many=True
+        )
+        return Response(serializer.data, status=HTTP_200_OK)
 
 
 class OrderItemCartDetailView(generics.ListAPIView):

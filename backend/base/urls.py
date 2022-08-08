@@ -4,12 +4,17 @@ from .views import *
 urlpatterns = [
     path("auth/login", LoginView.as_view()),
     path("me", RetrieveCurrentUserView.as_view()),
+    path(
+        "user/change_email/<int:pk>",
+        UserChangeEmailView.as_view(),
+    ),
     path("restaurants", ListRestaurantsViewset.as_view()),
     path("restaurant/<int:pk>", RetrieveRestaurantViewset.as_view()),
     path("dish/<int:pk>", DishDetailViewset.as_view()),
     path("cart", OrderItemCartDetailView.as_view()),
     path("cart/add-coupon", ActivateCouponView.as_view()),
     path("cart/add-to-cart", AddToCartView.as_view()),
+    path("cart/remove-item", RemoveProductFromCartView.as_view()),
     path("order-summary", OrderDetailView.as_view()),
     path("order-summary/update-quantity", UpdateOrderQuantity.as_view()),
     path("comments", CommentListView.as_view()),

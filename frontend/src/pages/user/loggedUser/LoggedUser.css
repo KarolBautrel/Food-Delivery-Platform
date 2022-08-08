@@ -1,0 +1,19 @@
+.rounded-border-btn.brand{ 
+    margin-right: auto;
+    color: #fff;
+    text-decoration: none;}
+
+.rounded-border-btn{
+    color: #fff;
+    text-decoration: none;
+    margin-left: 40px;
+    padding: 8px;
+    border: 1px solid #fff;
+    border-radius: 4px;
+}
+
+.rounded-border-btn:hover{
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+}
