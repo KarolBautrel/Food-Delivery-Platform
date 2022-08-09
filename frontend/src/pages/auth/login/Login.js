@@ -35,6 +35,7 @@ export const Login = () => {
       });
       if (response.ok) {
         const data = await response.json();
+        console.log(data);
         dispatch(
           getLoggedUserData({
             name: data.username,
@@ -73,16 +74,12 @@ export const Login = () => {
     },
   ];
 
-  const handleHide = () => {
-    setAlertMessage({
-      ...alertMessage,
-      status: false,
-    });
-  };
-
   return (
     <div>
-      <AlertMessage alertMessage={alertMessage} handleHide={handleHide} />
+      <AlertMessage
+        alertMessage={alertMessage}
+        setAlertMessage={setAlertMessage}
+      />
 
       <h1>Login </h1>
       <form onSubmit={handleSubmit}>

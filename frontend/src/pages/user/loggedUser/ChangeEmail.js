@@ -31,12 +31,7 @@ export const ChangeEmail = ({ status, handleCloseEmailModal }) => {
       [e.target.name]: e.target.value,
     });
   };
-  const handleHide = () => {
-    setAlertMessage({
-      ...alertMessage,
-      status: false,
-    });
-  };
+  console.log(authData);
   const handleClick = async () => {
     try {
       const resp = await fetch(`/api/user/change_email/${authData.id}`, {
@@ -75,7 +70,10 @@ export const ChangeEmail = ({ status, handleCloseEmailModal }) => {
         show={status}
         onHide={handleCloseEmailModal}
       >
-        <AlertMessage alertMessage={alertMessage} handleHide={handleHide} />
+        <AlertMessage
+          alertMessage={alertMessage}
+          setAlertMessage={setAlertMessage}
+        />
         <Modal.Header closeButton>
           <Modal.Title>Change Email</Modal.Title>
         </Modal.Header>

@@ -73,12 +73,7 @@ export const ChangePassword = ({ status, handleClosePasswordModal }) => {
       });
     }
   };
-  const handleHide = () => {
-    setAlertMessage({
-      ...alertMessage,
-      status: false,
-    });
-  };
+
   return (
     <>
       <Modal
@@ -86,7 +81,10 @@ export const ChangePassword = ({ status, handleClosePasswordModal }) => {
         show={status}
         onHide={handleClosePasswordModal}
       >
-        <AlertMessage alertMessage={alertMessage} handleHide={handleHide} />
+        <AlertMessage
+          alertMessage={alertMessage}
+          setAlertMessage={setAlertMessage}
+        />
         <Modal.Header closeButton>
           <Modal.Title>Change Password</Modal.Title>
         </Modal.Header>
