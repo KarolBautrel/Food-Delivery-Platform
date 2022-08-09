@@ -56,7 +56,7 @@ class LoginView(APIView):
                 )
 
         else:
-            return Response("SOmething went wrong", status=HTTP_404_NOT_FOUND)
+            return Response("Password doesnt match", status=HTTP_404_NOT_FOUND)
 
 
 class RetrieveCurrentUserView(generics.RetrieveAPIView):

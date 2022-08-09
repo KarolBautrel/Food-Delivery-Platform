@@ -10,16 +10,12 @@ import "./Restaurant.css";
 export const Restaurant = () => {
   const { id } = useParams();
   const { data, isLoading, isError } = useFetch(`/api/restaurant/${id}`);
-  const [showModal, setShowModal] = useState(false);
   const { token } = useSelector((state) => state.auth);
 
   if (isError) {
     return <div>An error occured during connection</div>;
   }
 
-  const popUpModal = () => {
-    showModal ? setShowModal(false) : setShowModal(true);
-  };
   return (
     <div>
       {isLoading ? (
@@ -27,14 +23,8 @@ export const Restaurant = () => {
       ) : (
         <div>
           <RestaurantDetails data={data} />
-          {showModal && <RestaurantBook data={data} token={token} />}
-          <button
-            style={{ marginLeft: "10%" }}
-            onClick={popUpModal}
-            className="button"
-          >
-            Book Table !
-          </button>
+          <RestaurantBook data={data} token={token} />
+
           <DishesList data={data} />
           <RestaurantComments data={data} RestaurantId={id} />
         </div>

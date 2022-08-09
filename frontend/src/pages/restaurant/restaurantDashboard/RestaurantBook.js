@@ -1,15 +1,15 @@
 import { useState } from "react";
 import Button from "react-bootstrap/Button";
 import "./RestaurantBook.css";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
+import Modal from "react-bootstrap/Modal";
+
 import Col from "react-bootstrap/Col";
 import { useNavigate } from "react-router-dom";
 export const RestaurantBook = ({ data, token }) => {
   const redirect = useNavigate();
   const [tablesQuantity, setTableQuantity] = useState(0);
   const [bookingDate, setBookingDate] = useState();
-  console.log(data.id);
+  const [show, setShow] = useState(false);
   const handleClick = async (e) => {
     e.preventDefault();
     try {
@@ -35,11 +35,18 @@ export const RestaurantBook = ({ data, token }) => {
       alert(error);
     }
   };
-
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
   return (
-    <Container className="card booking-container">
-      <Row>
-        <Col>
+    <>
+      <button className="button" onClick={handleShow}>
+        Book Table
+      </button>
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Table Booking</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
           <form className="booking-form">
             <label className="booking-label">
               <span style={{ marginLeft: "43%" }}>Table Quantity</span>
@@ -67,11 +74,15 @@ export const RestaurantBook = ({ data, token }) => {
               />
             </label>
           </form>
-        </Col>
-      </Row>
-      <Button onClick={handleClick} className="booking-btn" variant="success">
-        Book it !
-      </Button>
-    </Container>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClick}>
+            Book Table
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 };
+
+<Col></Col>;

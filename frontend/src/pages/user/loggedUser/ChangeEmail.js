@@ -2,10 +2,15 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import ListGroup from "react-bootstrap/ListGroup";
 import { useState, useEffect } from "react";
-
+import { AlertMessage } from "../../../components/AlertMessage";
 export const ChangeEmail = ({ status, handleCloseEmailModal }) => {
   const authData = JSON.parse(window.localStorage.getItem("AUTH_CREDENTIALS"));
 
+  const [alertMessage, setAlertMessage] = useState({
+    status: false,
+    alert: "danger",
+    body: "",
+  });
   const [changeEmail, setChangeEmail] = useState({
     email: "",
     re_email: "",
@@ -26,7 +31,12 @@ export const ChangeEmail = ({ status, handleCloseEmailModal }) => {
       [e.target.name]: e.target.value,
     });
   };
-
+  const handleHide = () => {
+    setAlertMessage({
+      ...alertMessage,
+      status: false,
+    });
+  };
   const handleClick = async () => {
     try {
       const resp = await fetch(`/api/user/change_email/${authData.id}`, {
@@ -41,18 +51,31 @@ export const ChangeEmail = ({ status, handleCloseEmailModal }) => {
         }),
       });
       if (resp.ok) {
-        console.log("siema");
+        setAlertMessage({
+          status: true,
+          variant: "success",
+          body: "Email Has been changed",
+        });
       } else {
-        throw new Error("error");
+        throw new Error("Emails does not match");
       }
     } catch (error) {
-      alert(error);
+      setAlertMessage({
+        status: true,
+        variant: "danger",
+        body: error.message,
+      });
     }
   };
 
   return (
     <>
-      <Modal show={status} onHide={handleCloseEmailModal}>
+      <Modal
+        style={{ width: "100%" }}
+        show={status}
+        onHide={handleCloseEmailModal}
+      >
+        <AlertMessage alertMessage={alertMessage} handleHide={handleHide} />
         <Modal.Header closeButton>
           <Modal.Title>Change Email</Modal.Title>
         </Modal.Header>

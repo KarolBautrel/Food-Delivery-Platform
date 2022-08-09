@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import "./Navbar.css";
 import { Logout } from "../pages/auth/logout/Logout";
 import { AiOutlineShoppingCart } from "react-icons/ai";
-import { LoggedUser } from "../pages/user/loggedUser/LoggedUser";
+import { LoggedUserMenu } from "../pages/user/loggedUser/LoggedUserMenu";
 
 export const Navbar = () => {
   const { name } = useSelector((state) => state.auth);
@@ -26,7 +26,7 @@ export const Navbar = () => {
           </>
         ) : (
           <>
-            <LoggedUser />
+            <LoggedUserMenu />
             <Link className="navbar-buttons" to="/cart">
               <AiOutlineShoppingCart />
             </Link>

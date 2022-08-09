@@ -13,13 +13,33 @@ export const CartTable = ({ token }) => {
   window.localStorage.setItem("CART", JSON.stringify(data));
   const localStorageData = JSON.parse(window.localStorage.getItem("CART"));
   const [tableData, setTableData] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+
   useEffect(() => {
-    setTableData(localStorageData);
+    setTableData(localStorageData ? localStorageData : data);
+    setTotalPrice(
+      tableData
+        .map((orderItem) => orderItem.final_price)
+        .reduce((order, acc) => order + acc, 0)
+    );
   }, [data]);
 
-  const handleDecreaseQuantity = async (id, orderId) => {
+  useEffect(() => {
+    setTotalPrice(
+      tableData
+        .map((orderItem) => orderItem.final_price)
+        .reduce((order, acc) => order + acc, 0)
+    );
+  }, [tableData]);
+
+  const handleUpdateItemQty = async (id, updateType) => {
     try {
-      const response = await fetch("api/order-summary/update-quantity", {
+      let url =
+        updateType === "increase"
+          ? "api/cart/add-to-cart"
+          : "api/order-summary/update-quantity";
+
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           Authorization: `Token ${token}`,
@@ -30,27 +50,6 @@ export const CartTable = ({ token }) => {
       if (response.ok) {
         const data = await response.json();
         console.log(data);
-        handleRefresh(data);
-      } else {
-        throw new Error("Something went wrong");
-      }
-    } catch (error) {
-      alert(error);
-    }
-  };
-
-  const handleIncreaseQuantity = async (id, orderId) => {
-    try {
-      const response = await fetch("api/cart/add-to-cart", {
-        method: "POST",
-        headers: {
-          Authorization: `Token ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ product: id }),
-      });
-      if (response.ok) {
-        const data = await response.json();
         handleRefresh(data);
       } else {
         throw new Error("Something went wrong");
@@ -103,7 +102,6 @@ export const CartTable = ({ token }) => {
                 <th>Restaurant</th>
                 <th>Quantity</th>
                 <th>Price</th>
-                <th>Delete</th>
               </tr>
             </thead>
             <tbody>
@@ -117,7 +115,7 @@ export const CartTable = ({ token }) => {
                         className="clicker"
                         style={{ marginTop: "6px" }}
                         onClick={() => {
-                          handleDecreaseQuantity(order.item.id, order.id);
+                          handleUpdateItemQty(order.item.id, "decrease");
                         }}
                       >
                         -
@@ -130,7 +128,7 @@ export const CartTable = ({ token }) => {
                       className="clicker"
                       style={{ marginTop: "5px" }}
                       onClick={() => {
-                        handleIncreaseQuantity(order.item.id, order.id);
+                        handleUpdateItemQty(order.item.id, "increase");
                       }}
                     >
                       +
@@ -144,11 +142,19 @@ export const CartTable = ({ token }) => {
                       }}
                       variant="danger"
                     >
-                      Delete{" "}
+                      Delete
                     </Button>
                   </td>
                 </tr>
               ))}
+
+              <tr>
+                <th>Total price</th>
+              </tr>
+
+              <tr>
+                <td>{totalPrice}</td>
+              </tr>
             </tbody>
           </Table>
         </div>

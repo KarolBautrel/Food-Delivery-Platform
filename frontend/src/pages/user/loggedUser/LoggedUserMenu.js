@@ -3,16 +3,19 @@ import Modal from "react-bootstrap/Modal";
 import ListGroup from "react-bootstrap/ListGroup";
 import { useState, useEffect } from "react";
 import { ChangeEmail } from "./ChangeEmail";
+import { ChangePassword } from "./ChangePassword";
 import useFetch from "../../../hooks/useFetch";
 import "./LoggedUser.css";
-export const LoggedUser = () => {
+export const LoggedUserMenu = () => {
   const authData = JSON.parse(window.localStorage.getItem("AUTH_CREDENTIALS"));
   const { data, isLoading, isError } = useFetch("/api/me", authData.token);
   const [show, setShow] = useState(false);
   const [emailModalStatus, setEmailModalStatus] = useState(false);
+  const [passwordModalStatus, setPasswordModalStatus] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const handleCloseEmailModal = () => setEmailModalStatus(false);
+  const handleClosePasswordModal = () => setPasswordModalStatus(false);
   return (
     <>
       <a className="rounded-border-btn" onClick={handleShow}>
@@ -38,7 +41,17 @@ export const LoggedUser = () => {
               />
             </ListGroup.Item>
             <ListGroup.Item>
-              <Button>Change Password</Button>
+              <Button
+                onClick={() => {
+                  setPasswordModalStatus(true);
+                }}
+              >
+                Change Password
+              </Button>
+              <ChangePassword
+                status={passwordModalStatus}
+                handleClosePasswordModal={handleClosePasswordModal}
+              />
             </ListGroup.Item>
             <ListGroup.Item>
               <Button>Check Bookings</Button>
@@ -48,9 +61,6 @@ export const LoggedUser = () => {
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Close
-          </Button>
-          <Button variant="primary" onClick={handleClose}>
-            Save Changes
           </Button>
         </Modal.Footer>
       </Modal>
