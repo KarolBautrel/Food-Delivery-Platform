@@ -267,8 +267,11 @@ class BookTableView(APIView):
             tables_quantity = int(request.data.get("tables_quantity", None))
             date = request.data.get("date", None)
             print(tables_quantity, date)
-            if tables_quantity == None or date == None:
-                return Response(status=HTTP_400_BAD_REQUEST)
+            if tables_quantity == 0 or date == None:
+                return Response(
+                    {"Message": "tables quantity and date cant be none"},
+                    status=HTTP_400_BAD_REQUEST,
+                )
         except ValueError:
             return Response({"Message": "Restauran doesnt exist"})
         date = models.DateField().to_python(date)

@@ -17,6 +17,7 @@ export const LoggedUserMenu = () => {
       headers: { Authorization: `Token ${authData.token}` },
     }).then((response) => response.json())
   );
+  console.log(data);
   const [show, setShow] = useState(false);
   const [emailModalPopupStatus, setEmailModalPopupStatus] = useState(false);
   const [passwordModalPopupStatus, setPasswordModalPopupStatus] =

@@ -17,27 +17,27 @@ export const RestaurantBook = ({ data, token, setAlertMessage }) => {
 
   const bookTable = async () => {
     try {
-      if (bookingDate && tablesQuantity) {
-        const resp = await fetch("/api/booking/book-table", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Token ${token}`,
-          },
-          body: JSON.stringify({
-            tables_quantity: tablesQuantity,
-            date: bookingDate,
-            restaurant: data.id,
-          }),
+      const resp = await fetch("/api/booking/book-table", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify({
+          tables_quantity: tablesQuantity,
+          date: bookingDate,
+          restaurant: data.id,
+        }),
+      });
+      console.log(resp);
+      if (resp.ok) {
+        setAlertMessage({
+          status: true,
+          variant: "success",
+          body: "You booked the table",
         });
-        if (resp.ok) {
-          const data = await resp.json();
-          return data;
-        } else {
-          throw new Error("Something went wrong");
-        }
       } else {
-        throw new Error("All fields are required");
+        throw new Error("Something went wrong");
       }
     } catch (error) {
       setAlertMessage({
@@ -45,6 +45,7 @@ export const RestaurantBook = ({ data, token, setAlertMessage }) => {
         variant: "danger",
         body: error.message,
       });
+      setShow(false);
     }
   };
 
@@ -52,12 +53,6 @@ export const RestaurantBook = ({ data, token, setAlertMessage }) => {
     onSuccess: () => {
       // Invalidate and refetch
       queryClient.invalidateQueries(["restaurant"]);
-      console.log("bum");
-      setAlertMessage({
-        status: true,
-        variant: "success",
-        body: "You booked the table",
-      });
       setShow(false);
     },
   });
