@@ -23,7 +23,12 @@ class User(AbstractUser):
 
     def get_booked_tables(self):
         booked_tables = [
-            (i.restaurant.name, i.booking_date, i.tables_quantity, i.id)
+            {
+                "name": i.restaurant.name,
+                "date": i.booking_date.strftime("%m/%d/%Y"),
+                "quantity": i.tables_quantity,
+                "id": i.id,
+            }
             for i in self.booker.all()
         ]
         return booked_tables
@@ -157,7 +162,7 @@ class TableBooking(models.Model):
     )
     tables_quantity = models.IntegerField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
-    booking_date = models.DateTimeField(blank=True, null=True)
+    booking_date = models.DateTimeField(blank=False, null=False)
 
     def __str__(self):
         return f"{self.booker.name} to {self.restaurant.name} on {self.created}"

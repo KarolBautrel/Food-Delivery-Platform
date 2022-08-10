@@ -18,6 +18,7 @@ export const Logout = () => {
       });
       dispatch(clearUserData());
       window.localStorage.removeItem("AUTH_CREDENTIALS");
+      window.localStorage.removeItem("CART");
       console.log("success");
     } catch (error) {
       console.log(error);

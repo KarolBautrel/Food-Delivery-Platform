@@ -3,14 +3,14 @@ import { useEffect, useState } from "react";
 export default function useFetch(url, token = null) {
   const [data, setData] = useState([]);
   const [status, setStatus] = useState("idle");
-  const getData = async (fetchURL) => {
+  const getData = async () => {
     try {
       let res;
       setStatus("pending");
       if (token === null) {
-        res = await fetch(fetchURL);
+        res = await fetch(url);
       } else {
-        res = await fetch(fetchURL, {
+        res = await fetch(url, {
           method: "GET",
           headers: { Authorization: `Token ${token}` },
         });
@@ -25,7 +25,7 @@ export default function useFetch(url, token = null) {
   };
 
   useEffect(() => {
-    getData(url);
+    getData();
   }, [url]);
 
   return {

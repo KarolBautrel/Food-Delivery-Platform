@@ -2,11 +2,19 @@ import { useEffect, useState } from "react";
 import { getLoggedUserData } from "../../../redux/auth";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { AlertMessage } from "../../../components/AlertMessage";
 export const Login = () => {
   const [login, setLogin] = useState({
     email: "",
     password: "",
   });
+
+  const [alertMessage, setAlertMessage] = useState({
+    status: false,
+    alert: "danger",
+    body: "",
+  });
+
   const [data, setData] = useState({});
   const redirect = useNavigate();
   const dispatch = useDispatch();
@@ -27,6 +35,7 @@ export const Login = () => {
       });
       if (response.ok) {
         const data = await response.json();
+        console.log(data);
         dispatch(
           getLoggedUserData({
             name: data.username,
@@ -42,8 +51,11 @@ export const Login = () => {
         throw new Error("Provided credentials are not correct");
       }
     } catch (err) {
-      console.log(err);
-      alert(err);
+      setAlertMessage({
+        status: true,
+        variant: "danger",
+        body: err.message,
+      });
     }
   };
 
@@ -61,8 +73,14 @@ export const Login = () => {
       id: "password",
     },
   ];
+
   return (
     <div>
+      <AlertMessage
+        alertMessage={alertMessage}
+        setAlertMessage={setAlertMessage}
+      />
+
       <h1>Login </h1>
       <form onSubmit={handleSubmit}>
         {loginForm.map(({ name, placeholder, id, type }) => (

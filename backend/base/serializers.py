@@ -130,3 +130,18 @@ class OrderSerializer(ModelSerializer):
 
     def get_order_items(self, obj):
         return OrderItemSerializer(obj.items.all(), many=True).data
+
+
+class EmailChangeSerializer(ModelSerializer):
+
+    re_email = EmailField()
+
+    class Meta:
+        model = User
+        fields = ["email", "re_email"]
+
+    def validate(self, data):
+        if data["email"] == data["re_email"]:
+            return data
+        else:
+            raise ValidationError("Emails needs to be the same")

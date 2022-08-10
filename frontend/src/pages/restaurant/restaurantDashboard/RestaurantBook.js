@@ -1,48 +1,79 @@
 import { useState } from "react";
 import Button from "react-bootstrap/Button";
 import "./RestaurantBook.css";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
+import Modal from "react-bootstrap/Modal";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import Col from "react-bootstrap/Col";
 import { useNavigate } from "react-router-dom";
-export const RestaurantBook = ({ data, token }) => {
+
+export const RestaurantBook = ({ data, token, setAlertMessage }) => {
   const redirect = useNavigate();
+  const queryClient = useQueryClient();
+
   const [tablesQuantity, setTableQuantity] = useState(0);
   const [bookingDate, setBookingDate] = useState();
-  console.log(data.id);
-  const handleClick = async (e) => {
-    e.preventDefault();
+  const [show, setShow] = useState(false);
+
+  const bookTable = async () => {
     try {
-      const resp = await fetch("/api/booking/book-table", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${token}`,
-        },
-        body: JSON.stringify({
-          tables_quantity: tablesQuantity,
-          date: bookingDate,
-          restaurant: data.id,
-        }),
-      });
-      if (resp.ok) {
-        alert("You booked table");
-        redirect(`/restaurant/${data.id}`);
+      if (bookingDate && tablesQuantity) {
+        const resp = await fetch("/api/booking/book-table", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify({
+            tables_quantity: tablesQuantity,
+            date: bookingDate,
+            restaurant: data.id,
+          }),
+        });
+        if (resp.ok) {
+          const data = await resp.json();
+          return data;
+        } else {
+          throw new Error("Something went wrong");
+        }
       } else {
-        throw new Error("Something went wrong");
+        throw new Error("All fields are required");
       }
     } catch (error) {
-      alert(error);
+      setAlertMessage({
+        status: true,
+        variant: "danger",
+        body: error.message,
+      });
     }
   };
 
+  const mutation = useMutation(bookTable, {
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries(["restaurant"]);
+      console.log("bum");
+      setAlertMessage({
+        status: true,
+        variant: "success",
+        body: "You booked the table",
+      });
+      setShow(false);
+    },
+  });
   return (
-    <Container className="card booking-container">
-      <Row>
-        <Col>
+    <>
+      <button className="button" onClick={() => setShow(true)}>
+        Book Table
+      </button>
+      <Modal show={show} onHide={() => setShow(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Table Booking</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
           <form className="booking-form">
             <label className="booking-label">
-              <span style={{ marginLeft: "43%" }}>Table Quantity</span>
+              <span>Table Quantity</span>
               <input
                 className="booking-form"
                 type="number"
@@ -55,7 +86,7 @@ export const RestaurantBook = ({ data, token }) => {
             </label>
 
             <label className="booking-label">
-              <span style={{ marginLeft: "50%" }}>Pick date</span>
+              <span>Pick date</span>
               <input
                 className="booking-form"
                 type="date"
@@ -66,12 +97,24 @@ export const RestaurantBook = ({ data, token }) => {
                 }}
               />
             </label>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                mutation.mutate({
+                  tables_quantity: tablesQuantity,
+                  date: bookingDate,
+                  restaurant: data.id,
+                });
+              }}
+            >
+              Book Table
+            </Button>
           </form>
-        </Col>
-      </Row>
-      <Button onClick={handleClick} className="booking-btn" variant="success">
-        Book it !
-      </Button>
-    </Container>
+        </Modal.Body>
+        <Modal.Footer></Modal.Footer>
+      </Modal>
+    </>
   );
 };
+
+<Col></Col>;

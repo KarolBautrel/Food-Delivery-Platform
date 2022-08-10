@@ -180,3 +180,5 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_HOST_USER = "botfooddelivery@gmail.com"
 EMAIL_HOST_PASSWORD = os.getenv("GMAIL_PASSWORD")
 EMAIL_PORT = 587
+DATE_FORMAT = "%d/%m/%Y"
+USE_L10N = False

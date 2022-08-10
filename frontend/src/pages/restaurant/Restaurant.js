@@ -1,42 +1,50 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import useFetch from "../../hooks/useFetch";
 import { DishesList } from "./DishesList";
 import { RestaurantDetails } from "./restaurantDashboard/RestaurantDetails";
 import { RestaurantComments } from "./comments/RestaurantComments";
 import { RestaurantBook } from "./restaurantDashboard/RestaurantBook";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
+import { AlertMessage } from "../../components/AlertMessage";
+
 import "./Restaurant.css";
 export const Restaurant = () => {
   const { id } = useParams();
-  const { data, isLoading, isError } = useFetch(`/api/restaurant/${id}`);
-  const [showModal, setShowModal] = useState(false);
+  const { data, status, refetch } = useQuery(
+    ["restaurant"],
+    () => fetch(`/api/restaurant/${id}`).then((response) => response.json()),
+    { refetchOnWindowFocus: "always" }
+  );
+  const [alertMessage, setAlertMessage] = useState({
+    status: false,
+    alert: "danger",
+    body: "",
+  });
   const { token } = useSelector((state) => state.auth);
-
-  if (isError) {
+  if (status === "error") {
     return <div>An error occured during connection</div>;
   }
 
-  const popUpModal = () => {
-    showModal ? setShowModal(false) : setShowModal(true);
-  };
   return (
     <div>
-      {isLoading ? (
+      {status === "loading" ? (
         <div> Loading...</div>
       ) : (
         <div>
+          <AlertMessage
+            alertMessage={alertMessage}
+            setAlertMessage={setAlertMessage}
+          />
           <RestaurantDetails data={data} />
-          {showModal && <RestaurantBook data={data} token={token} />}
-          <button
-            style={{ marginLeft: "10%" }}
-            onClick={popUpModal}
-            className="button"
-          >
-            Book Table !
-          </button>
+          <RestaurantBook
+            data={data}
+            token={token}
+            setAlertMessage={setAlertMessage}
+          />
+
           <DishesList data={data} />
-          <RestaurantComments data={data} RestaurantId={id} />
+          <RestaurantComments data={data} RestaurantId={id} refetch={refetch} />
         </div>
       )}
     </div>
