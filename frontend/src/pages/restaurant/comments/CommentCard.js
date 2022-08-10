@@ -2,8 +2,12 @@ import React from "react";
 import Button from "react-bootstrap/Button";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 export const CommentCard = ({ comment, authData, handleRefresh, token }) => {
-  const handleDelete = async (id) => {
+  const queryClient = useQueryClient();
+
+  const deleteComment = async (id) => {
     try {
       const resp = await fetch(`/api/comment/delete/${id}`, {
         method: "DELETE",
@@ -18,6 +22,14 @@ export const CommentCard = ({ comment, authData, handleRefresh, token }) => {
       alert(error);
     }
   };
+
+  const mutation = useMutation(deleteComment, {
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries(["restaurant"]);
+      console.log("udalo sie");
+    },
+  });
   return (
     <>
       <Row
@@ -46,7 +58,7 @@ export const CommentCard = ({ comment, authData, handleRefresh, token }) => {
                 }}
                 variant="danger"
                 onClick={() => {
-                  handleDelete(comment.id);
+                  mutation.mutate(comment.id);
                 }}
               >
                 Delete

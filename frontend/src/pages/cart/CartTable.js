@@ -49,7 +49,6 @@ export const CartTable = ({ token }) => {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         handleRefresh(data);
       } else {
         throw new Error("Something went wrong");
@@ -105,7 +104,7 @@ export const CartTable = ({ token }) => {
               </tr>
             </thead>
             <tbody>
-              {tableData.map((order, index) => (
+              {tableData.map((order) => (
                 <tr key={order.id}>
                   <td>{order.item.name}</td>
                   <td>{order.item.restaurant}</td>

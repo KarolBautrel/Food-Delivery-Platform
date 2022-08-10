@@ -2,12 +2,14 @@ import FloatingLabel from "react-bootstrap/FloatingLabel";
 import Form from "react-bootstrap/Form";
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-function CommentForm({ data, handleRefresh }) {
+function CommentForm({ data, handleRefresh, refetch }) {
   const [comment, setComment] = useState("");
   const { token } = useSelector((state) => state.auth);
   const [rate, setRate] = useState("");
-  const handleClick = async (event) => {
+  const queryClient = useQueryClient();
+  const postComment = async () => {
     try {
       const resp = await fetch("/api/comment/create", {
         method: "POST",
@@ -22,7 +24,7 @@ function CommentForm({ data, handleRefresh }) {
         }),
       });
       if (resp.ok) {
-        handleRefresh();
+        return resp.json();
       } else {
         throw new Error("something went wrong");
       }
@@ -30,6 +32,14 @@ function CommentForm({ data, handleRefresh }) {
       alert(error);
     }
   };
+
+  const mutation = useMutation(postComment, {
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries(["restaurant"]);
+      console.log("udalo sie");
+    },
+  });
   return (
     <>
       <h3>Leave opinion below</h3>
@@ -65,7 +75,11 @@ function CommentForm({ data, handleRefresh }) {
 
         <button
           onClick={() => {
-            handleClick();
+            mutation.mutate({
+              body: comment,
+              rate: rate,
+              commented_subject: data.id,
+            });
           }}
           className="button"
         >

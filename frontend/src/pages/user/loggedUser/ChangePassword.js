@@ -3,7 +3,7 @@ import Modal from "react-bootstrap/Modal";
 import ListGroup from "react-bootstrap/ListGroup";
 import { useState, useEffect } from "react";
 import { AlertMessage } from "../../../components/AlertMessage";
-export const ChangePassword = ({ status, handleClosePasswordModal }) => {
+export const ChangePassword = ({ status, setPasswordModalPopupStatus }) => {
   const authData = JSON.parse(window.localStorage.getItem("AUTH_CREDENTIALS"));
 
   const [alertMessage, setAlertMessage] = useState({
@@ -17,7 +17,6 @@ export const ChangePassword = ({ status, handleClosePasswordModal }) => {
     current_password: "",
   });
 
-  console.log(changePassword);
   const changePasswordForm = [
     {
       name: "current_password",
@@ -79,7 +78,9 @@ export const ChangePassword = ({ status, handleClosePasswordModal }) => {
       <Modal
         style={{ width: "100%" }}
         show={status}
-        onHide={handleClosePasswordModal}
+        onHide={() => {
+          setPasswordModalPopupStatus(false);
+        }}
       >
         <AlertMessage
           alertMessage={alertMessage}

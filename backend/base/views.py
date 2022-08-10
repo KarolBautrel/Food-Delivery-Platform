@@ -266,7 +266,9 @@ class BookTableView(APIView):
             restaurant_id = request.data.get("restaurant", None)
             tables_quantity = int(request.data.get("tables_quantity", None))
             date = request.data.get("date", None)
-            print(restaurant_id, tables_quantity, date)
+            print(tables_quantity, date)
+            if tables_quantity == None or date == None:
+                return Response(status=HTTP_400_BAD_REQUEST)
         except ValueError:
             return Response({"Message": "Restauran doesnt exist"})
         date = models.DateField().to_python(date)
@@ -295,7 +297,7 @@ class BookTableView(APIView):
             )
 
 
-class FinishTableReservationView(APIView):
+class CancelTableReservationView(APIView):
     permission_classes = (TableBookerAllow,)
 
     def delete(self, request, *args, **kwargs):

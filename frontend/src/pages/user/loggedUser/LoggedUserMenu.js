@@ -4,18 +4,29 @@ import ListGroup from "react-bootstrap/ListGroup";
 import { useState, useEffect } from "react";
 import { ChangeEmail } from "./ChangeEmail";
 import { ChangePassword } from "./ChangePassword";
+import { Bookings } from "./Bookings";
+import { useQuery } from "@tanstack/react-query";
+
 import useFetch from "../../../hooks/useFetch";
 import "./LoggedUser.css";
 export const LoggedUserMenu = () => {
   const authData = JSON.parse(window.localStorage.getItem("AUTH_CREDENTIALS"));
-  const { data, isLoading, isError } = useFetch("/api/me", authData.token);
+  const { data, status } = useQuery(["me"], () =>
+    fetch("/api/me", {
+      method: "GET",
+      headers: { Authorization: `Token ${authData.token}` },
+    }).then((response) => response.json())
+  );
   const [show, setShow] = useState(false);
-  const [emailModalStatus, setEmailModalStatus] = useState(false);
-  const [passwordModalStatus, setPasswordModalStatus] = useState(false);
+  const [emailModalPopupStatus, setEmailModalPopupStatus] = useState(false);
+  const [passwordModalPopupStatus, setPasswordModalPopupStatus] =
+    useState(false);
+  const [bookingModalPopupStatus, setBookingModalPopupStatus] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-  const handleCloseEmailModal = () => setEmailModalStatus(false);
-  const handleClosePasswordModal = () => setPasswordModalStatus(false);
+
+  if (status === "loading") return <p>Loading...</p>;
+  if (status === "error") return <p>Error</p>;
   return (
     <>
       <a className="rounded-border-btn" onClick={handleShow}>
@@ -23,38 +34,49 @@ export const LoggedUserMenu = () => {
       </a>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Profile Settings ({data.username})</Modal.Title>
+          <Modal.Title>Profile Settings ({data.name})</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <ListGroup>
             <ListGroup.Item>
               <Button
                 onClick={() => {
-                  setEmailModalStatus(true);
+                  setEmailModalPopupStatus(true);
                 }}
               >
                 Change Email
               </Button>
               <ChangeEmail
-                status={emailModalStatus}
-                handleCloseEmailModal={handleCloseEmailModal}
+                status={emailModalPopupStatus}
+                setEmailModalPopupStatus={setEmailModalPopupStatus}
               />
             </ListGroup.Item>
             <ListGroup.Item>
               <Button
                 onClick={() => {
-                  setPasswordModalStatus(true);
+                  setPasswordModalPopupStatus(true);
                 }}
               >
                 Change Password
               </Button>
               <ChangePassword
-                status={passwordModalStatus}
-                handleClosePasswordModal={handleClosePasswordModal}
+                status={passwordModalPopupStatus}
+                setPasswordModalPopupStatus={setPasswordModalPopupStatus}
               />
             </ListGroup.Item>
             <ListGroup.Item>
-              <Button>Check Bookings</Button>
+              <Button
+                onClick={() => {
+                  setBookingModalPopupStatus(true);
+                }}
+              >
+                Check Bookings
+              </Button>
+              <Bookings
+                status={bookingModalPopupStatus}
+                setBookingModalPopupStatus={setBookingModalPopupStatus}
+                data={data}
+              />
             </ListGroup.Item>
           </ListGroup>
         </Modal.Body>

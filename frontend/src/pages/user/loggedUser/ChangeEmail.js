@@ -3,7 +3,8 @@ import Modal from "react-bootstrap/Modal";
 import ListGroup from "react-bootstrap/ListGroup";
 import { useState, useEffect } from "react";
 import { AlertMessage } from "../../../components/AlertMessage";
-export const ChangeEmail = ({ status, handleCloseEmailModal }) => {
+
+export const ChangeEmail = ({ status, setEmailModalPopupStatus }) => {
   const authData = JSON.parse(window.localStorage.getItem("AUTH_CREDENTIALS"));
 
   const [alertMessage, setAlertMessage] = useState({
@@ -31,7 +32,6 @@ export const ChangeEmail = ({ status, handleCloseEmailModal }) => {
       [e.target.name]: e.target.value,
     });
   };
-  console.log(authData);
   const handleClick = async () => {
     try {
       const resp = await fetch(`/api/user/change_email/${authData.id}`, {
@@ -68,7 +68,9 @@ export const ChangeEmail = ({ status, handleCloseEmailModal }) => {
       <Modal
         style={{ width: "100%" }}
         show={status}
-        onHide={handleCloseEmailModal}
+        onHide={() => {
+          setEmailModalPopupStatus(false);
+        }}
       >
         <AlertMessage
           alertMessage={alertMessage}
@@ -96,7 +98,12 @@ export const ChangeEmail = ({ status, handleCloseEmailModal }) => {
           </ListGroup>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseEmailModal}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setEmailModalPopupStatus(false);
+            }}
+          >
             Close
           </Button>
           <Button onClick={handleClick} variant="primary">

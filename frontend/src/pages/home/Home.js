@@ -12,7 +12,6 @@ export default function Home() {
   const [url, setUrl] = useState(`/api/restaurants`);
   const { data, isLoading, isError } = useFetch(url);
   const { name } = useSelector((state) => state.auth);
-  console.log(name);
   const handleSearch = (city) => {
     setUrl(`/api/restaurants?city=${city}`);
   };

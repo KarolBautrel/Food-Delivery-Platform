@@ -23,5 +23,5 @@ urlpatterns = [
     path("comment/delete/<int:pk>", CommentDestroyView.as_view()),
     path("comment/update/<int:pk>", CommentUpdateView.as_view()),
     path("booking/book-table", BookTableView.as_view()),
-    path("booking/delete-table", FinishTableReservationView.as_view()),
+    path("booking/delete-table", CancelTableReservationView.as_view()),
 ]
