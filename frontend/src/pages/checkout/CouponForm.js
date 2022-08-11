@@ -2,11 +2,14 @@ import { useState, setState } from "react";
 import Button from "react-bootstrap/Button";
 import { useDispatch } from "react-redux";
 import { reducePriceByCoupon } from "../../redux/order";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const CouponForm = ({ items, authData, price }) => {
   const [coupon, setCoupon] = useState("");
   const dispatch = useDispatch();
-  const handleClick = async () => {
+  const queryClient = useQueryClient();
+
+  const proceedCoupon = async () => {
     const resp = await fetch("/api/cart/add-coupon", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -24,6 +27,12 @@ export const CouponForm = ({ items, authData, price }) => {
     }
   };
 
+  const mutation = useMutation(proceedCoupon, {
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries(["summary"]);
+    },
+  });
   return (
     <>
       <h3>Total price : {price}</h3>
@@ -36,7 +45,15 @@ export const CouponForm = ({ items, authData, price }) => {
           setCoupon(e.target.value);
         }}
       />
-      <Button variant="success" onClick={handleClick}>
+      <Button
+        variant="success"
+        onClick={() => {
+          mutation.mutate({
+            user: authData.id,
+            coupon: coupon,
+          });
+        }}
+      >
         Release Coupon
       </Button>
     </>
