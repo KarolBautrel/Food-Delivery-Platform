@@ -1,6 +1,6 @@
 from calendar import c
 from urllib.error import HTTPError
-from django.shortcuts import render
+from django.shortcuts import redirect
 from .models import *
 from rest_framework import generics
 from .serializers import *
@@ -14,7 +14,6 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_404_NOT_FOUND,
-    HTTP_500_INTERNAL_SERVER_ERROR,
     HTTP_400_BAD_REQUEST,
 )
 from django_filters.rest_framework import DjangoFilterBackend
@@ -23,6 +22,9 @@ from datetime import datetime
 from django.contrib.auth.hashers import check_password
 from rest_framework.authtoken.models import Token
 from django.db import models
+import stripe
+from backend.settings import STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY, SITE_URL
+from django.db.models import Q
 
 
 class LoginView(APIView):
@@ -107,7 +109,6 @@ class AddToCartView(APIView):
             Dish,
             id=product_id,
         )
-
         order_item_qs = OrderItem.objects.filter(
             item=item, user=request.user, ordered=False
         )
@@ -326,7 +327,7 @@ class CancelTableReservationView(APIView):
 class ActivateCouponView(APIView):
     def put(self, request, *args, **kwargs):
         try:
-            order_id = request.data.get("order", None)
+            user_id = request.data.get("user", None)
             coupon_code = request.data.get("coupon", None)
         except:
             return Response(
@@ -341,15 +342,16 @@ class ActivateCouponView(APIView):
                 status=HTTP_400_BAD_REQUEST,
             )
 
-        order_qs = Order.objects.filter(id=order_id)
+        order_qs = Order.objects.filter(user=user_id)
         if order_qs.exists():
             order = order_qs.first()
             order.coupon = coupon
             coupon.is_used = True
             coupon.save()
             order.save()
+            serializer = OrderSerializer(order)
             return Response(
-                {"Message": "Success"},
+                serializer.data,
                 status=HTTP_200_OK,
             )
         else:
@@ -357,3 +359,64 @@ class ActivateCouponView(APIView):
                 {"Message": "Order does not exists"},
                 status=HTTP_400_BAD_REQUEST,
             )
+
+
+class CreateStripeCheckoutSession(APIView):
+    def post(self, request, *args, **kwargs):
+        order_id = request.data.get("order_id", None)
+        try:
+            order = Order.objects.get(id=order_id)
+        except:
+            return Response({"Message": "Incorret order"}, status=HTTP_400_BAD_REQUEST)
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": "usd",
+                            "unit_amount": int(order.get_total()),
+                            "product_data": {"name": order.user.name},
+                        },
+                        "quantity": 1,
+                    }
+                ],
+                mode="payment",
+                success_url=SITE_URL + "?success=true",
+                cancel_url=SITE_URL + "?canceled=true",
+            )
+
+        except:
+            return Response(
+                {"Message": "Couldnt create session"}, status=HTTP_400_BAD_REQUEST
+            )
+
+        return redirect(checkout_session.url, code=303)
+
+
+class CompleteCheckout(APIView):
+    def post(self, request, *args, **kwargs):
+        user_id = request.data.get("user_id", None)
+        street_address = request.data.get("street_address", None)
+        apartment_address = request.data.get("apartment_address", None)
+
+        try:
+            order = Order.objects.get(user=user_id)
+        except:
+            return Response({"Message": "User dont have "})
+
+        address_qs = Address.objects.filter(
+            Q(street_address=street_address) & Q(apartment_address=apartment_address)
+        )
+        if address_qs.exists():
+            address = address_qs.first()
+        else:
+
+            address = Address.objects.create(
+                street_address=street_address,
+                apartment_address=apartment_address,
+            )
+            address.save()
+        order.shipping_address = address
+        order.save()
+        serializer = OrderSerializer(order)
+        return Response(serializer.data, status=HTTP_200_OK)

@@ -12,7 +12,7 @@ import { LoggedUserMenu } from "./pages/user/loggedUser/LoggedUserMenu";
 import { Cart } from "./pages/cart/Cart";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionHandler } from "./utilities/SessionHandler";
-
+import { CheckoutSummary } from "./pages/checkout/CheckoutSummary";
 const queryClient = new QueryClient();
 function App() {
   return (
@@ -30,6 +30,7 @@ function App() {
               <Route path="/user/:id" element={<User />} />
               <Route path="/user/me" element={<LoggedUserMenu />} />
               <Route path="/cart/" element={<Cart />} />
+              <Route path="/checkout/" element={<CheckoutSummary />} />
             </Routes>
           </BrowserRouter>
         </div>

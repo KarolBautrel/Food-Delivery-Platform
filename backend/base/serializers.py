@@ -102,13 +102,19 @@ class RestaurantDetailSerializer(ModelSerializer):
         return obj.average_rate()
 
 
+class AddressSerializer(ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ("street_address", "apartment_address")
+
+
 class OrderItemSerializer(ModelSerializer):
     item = SerializerMethodField()
     final_price = SerializerMethodField()
 
     class Meta:
         model = OrderItem
-        fields = ("id", "item", "quantity", "final_price")
+        fields = ("id", "item", "quantity", "final_price", "user")
 
     def get_item(self, obj):
         return DishSerializer(obj.item).data
@@ -120,10 +126,11 @@ class OrderItemSerializer(ModelSerializer):
 class OrderSerializer(ModelSerializer):
     order_items = SerializerMethodField()
     total = SerializerMethodField()
+    shipping_address = AddressSerializer()
 
     class Meta:
         model = Order
-        fields = ("id", "order_items", "total")
+        fields = ("id", "order_items", "total", "shipping_address")
 
     def get_total(self, obj):
         return obj.get_total()
