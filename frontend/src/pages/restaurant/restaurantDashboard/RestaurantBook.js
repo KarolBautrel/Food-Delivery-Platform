@@ -17,6 +17,15 @@ export const RestaurantBook = ({ data, token, setAlertMessage }) => {
 
   const bookTable = async () => {
     try {
+      if (
+        tablesQuantity == 0 ||
+        bookingDate == null ||
+        new Date() >= new Date(bookingDate)
+      ) {
+        throw new Error(
+          "You need to pick atleast one table and atleast todays date is required"
+        );
+      }
       const resp = await fetch("/api/booking/book-table", {
         method: "POST",
         headers: {
@@ -52,7 +61,7 @@ export const RestaurantBook = ({ data, token, setAlertMessage }) => {
   const mutation = useMutation(bookTable, {
     onSuccess: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries(["restaurant"]);
+      queryClient.invalidateQueries(["restaurant", "me"]);
       setShow(false);
     },
   });

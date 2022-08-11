@@ -16,7 +16,9 @@ export const AlertMessage = ({ alertMessage, setAlertMessage }) => {
         }}
         dismissible
       >
-        <Alert.Heading>{variant.toUpperCase()}</Alert.Heading>
+        <Alert.Heading>
+          {variant === "success" ? "Succes !" : "Error !"}
+        </Alert.Heading>
         <p>{body}</p>
       </Alert>
     );
