@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { reducePriceByCoupon } from "../../redux/order";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export const CouponForm = ({ items, authData, price }) => {
+export const CouponForm = ({ authData, price }) => {
   const [coupon, setCoupon] = useState("");
   const dispatch = useDispatch();
   const queryClient = useQueryClient();

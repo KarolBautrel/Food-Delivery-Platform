@@ -1,8 +1,6 @@
 import { CheckoutForm } from "./CheckoutForm";
 import { CouponForm } from "./CouponForm";
-import { useSelector, useDispatch } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
-
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
