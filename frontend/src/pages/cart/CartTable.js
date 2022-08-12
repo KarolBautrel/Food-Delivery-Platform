@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import useFetch from "../../hooks/useFetch";
-
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import { BiPlus, BiMinus } from "react-icons/bi";
 import "./CartTable.css";
+import { useNavigate } from "react-router-dom";
 
 export const CartTable = ({ token }) => {
   const [url, setUrl] = useState("/api/cart");
@@ -14,7 +14,7 @@ export const CartTable = ({ token }) => {
   const localStorageData = JSON.parse(window.localStorage.getItem("CART"));
   const [tableData, setTableData] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
-
+  const redirect = useNavigate();
   useEffect(() => {
     setTableData(localStorageData ? localStorageData : data);
     setTotalPrice(
@@ -37,7 +37,7 @@ export const CartTable = ({ token }) => {
       let url =
         updateType === "increase"
           ? "api/cart/add-to-cart"
-          : "api/order-summary/update-quantity";
+          : "api/cart/remove-from-cart";
 
       const response = await fetch(url, {
         method: "POST",
@@ -88,6 +88,7 @@ export const CartTable = ({ token }) => {
       alert(error);
     }
   }
+
   return (
     <div>
       {isLoading ? (
@@ -158,9 +159,18 @@ export const CartTable = ({ token }) => {
           </Table>
         </div>
       )}
-      <Button variant="success" style={{ marginLeft: "40%" }}>
-        Proceed to checkout
-      </Button>
+      {totalPrice === 0 ? null : (
+        <Button
+          variant="success"
+          style={{ marginLeft: "40%" }}
+          onClick={() => {
+            window.localStorage.setItem("CART", JSON.stringify(tableData));
+            redirect("/checkout/");
+          }}
+        >
+          Proceed to checkout
+        </Button>
+      )}
     </div>
   );
 };

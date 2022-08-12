@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-function CommentForm({ data, handleRefresh, refetch }) {
+function CommentForm({ data, setAlertMessage }) {
   const [comment, setComment] = useState("");
   const { token } = useSelector((state) => state.auth);
   const [rate, setRate] = useState("");
@@ -24,12 +24,20 @@ function CommentForm({ data, handleRefresh, refetch }) {
         }),
       });
       if (resp.ok) {
-        return resp.json();
+        setAlertMessage({
+          status: true,
+          variant: "success",
+          body: "Comment Added",
+        });
       } else {
-        throw new Error("something went wrong");
+        throw new Error("You cant comment and rate same restaurant Twice");
       }
     } catch (error) {
-      alert(error);
+      setAlertMessage({
+        status: true,
+        variant: "danger",
+        body: error.message,
+      });
     }
   };
 

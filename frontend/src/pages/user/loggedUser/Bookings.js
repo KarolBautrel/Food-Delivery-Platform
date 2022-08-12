@@ -26,8 +26,11 @@ export const Bookings = ({ status, setBookingModalPopupStatus, data }) => {
       if (!resp.ok) {
         throw new Error("Error during canceling table");
       }
-      const data = await resp.json();
-      return data;
+      setAlertMessage({
+        status: true,
+        variant: "success",
+        body: "You canceled table reservation",
+      });
     } catch (error) {
       setAlertMessage({
         status: true,
@@ -40,11 +43,7 @@ export const Bookings = ({ status, setBookingModalPopupStatus, data }) => {
     onSuccess: () => {
       // Invalidate and refetch
       queryClient.invalidateQueries(["me"]);
-      setAlertMessage({
-        status: true,
-        variant: "success",
-        body: "You canceled table reservation",
-      });
+      queryClient.invalidateQueries(["restaurants"]);
     },
   });
   return (

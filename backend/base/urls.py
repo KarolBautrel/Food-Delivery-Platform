@@ -16,7 +16,8 @@ urlpatterns = [
     path("cart/add-to-cart", AddToCartView.as_view()),
     path("cart/remove-item", RemoveProductFromCartView.as_view()),
     path("order-summary", OrderDetailView.as_view()),
-    path("order-summary/update-quantity", UpdateOrderQuantity.as_view()),
+    path("cart/remove-from-cart", RemoveFromCartView.as_view()),
+    path("order-summary/complete-checkout", CompleteCheckout.as_view()),
     path("comments", CommentListView.as_view()),
     path("comment/create", CommentsCreateView.as_view()),
     path("comment/<int:pk>", CommentDetailView.as_view()),
@@ -24,4 +25,5 @@ urlpatterns = [
     path("comment/update/<int:pk>", CommentUpdateView.as_view()),
     path("booking/book-table", BookTableView.as_view()),
     path("booking/delete-table", CancelTableReservationView.as_view()),
+    path("create-checkout-session/<pk>", CreateStripeCheckoutSession.as_view()),
 ]

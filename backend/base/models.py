@@ -53,8 +53,8 @@ class Restaurant(models.Model):
 
     def average_rate(self):
         try:
-            average_rate = sum(i.rate for i in self.comments.all()) / len(
-                self.comments.all()
+            average_rate = round(
+                sum(i.rate for i in self.comments.all()) / len(self.comments.all()), 2
             )
         except ZeroDivisionError:
             average_rate = 0
@@ -99,13 +99,6 @@ class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     items = models.ManyToManyField(OrderItem)
     ordered = models.BooleanField(default=False)
-    billing_address = models.ForeignKey(
-        "Address",
-        related_name="billing_address",
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
-    )
     shipping_address = models.ForeignKey(
         "Address",
         related_name="shipping_address",
@@ -120,7 +113,7 @@ class Order(models.Model):
     )
 
     def __str__(self):
-        return f"{self.billing_address} {self.status}"
+        return f"{self.shipping_address} {self.status}"
 
     def get_total(self):
         total = 0
@@ -130,16 +123,16 @@ class Order(models.Model):
             total -= self.coupon.amount
         return total
 
+    def __str__(self):
+        return f"{self.user.username} to {self.shipping_address} "
+
 
 class Address(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
     street_address = models.CharField(max_length=100)
     apartment_address = models.CharField(max_length=100)
-    zip = models.CharField(max_length=100)
-    default = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.user.username} with {self.street_address} "
+        return f" {self.street_address} "
 
 
 class Comments(models.Model):
@@ -162,7 +155,7 @@ class TableBooking(models.Model):
     )
     tables_quantity = models.IntegerField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
-    booking_date = models.DateTimeField(blank=False, null=False)
+    booking_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.booker.name} to {self.restaurant.name} on {self.created}"

@@ -9,7 +9,7 @@ export const RestaurantsList = ({ data, isLoading }) => {
         data.map((data) => (
           <div className="card" key={data.id}>
             <div className="restaurant-card-header">
-              <h1>{data.name} </h1>
+              <h1 className="text-3xl font-bold underline">{data.name} </h1>
               <h4>Rate: {data.avg_rate}/5</h4>
             </div>
             <h3>
