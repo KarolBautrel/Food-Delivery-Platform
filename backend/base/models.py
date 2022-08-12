@@ -53,8 +53,8 @@ class Restaurant(models.Model):
 
     def average_rate(self):
         try:
-            average_rate = sum(i.rate for i in self.comments.all()) / len(
-                self.comments.all()
+            average_rate = round(
+                sum(i.rate for i in self.comments.all()) / len(self.comments.all()), 2
             )
         except ZeroDivisionError:
             average_rate = 0
@@ -122,6 +122,9 @@ class Order(models.Model):
         if self.coupon:
             total -= self.coupon.amount
         return total
+
+    def __str__(self):
+        return f"{self.user.username} to {self.shipping_address} "
 
 
 class Address(models.Model):

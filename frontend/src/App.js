@@ -14,6 +14,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionHandler } from "./utilities/SessionHandler";
 import { CheckoutSummary } from "./pages/checkout/CheckoutSummary";
 const queryClient = new QueryClient();
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>

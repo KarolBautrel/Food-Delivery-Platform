@@ -5,13 +5,10 @@ import Button from "react-bootstrap/Button";
 import { BiPlus, BiMinus } from "react-icons/bi";
 import "./CartTable.css";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { getActualOrderData } from "../../redux/order";
 
 export const CartTable = ({ token }) => {
   const [url, setUrl] = useState("/api/cart");
   const { data, isLoading, isError } = useFetch(url, token);
-  const dispatch = useDispatch();
 
   window.localStorage.setItem("CART", JSON.stringify(data));
   const localStorageData = JSON.parse(window.localStorage.getItem("CART"));
@@ -40,7 +37,7 @@ export const CartTable = ({ token }) => {
       let url =
         updateType === "increase"
           ? "api/cart/add-to-cart"
-          : "api/order-summary/update-quantity";
+          : "api/cart/remove-from-cart";
 
       const response = await fetch(url, {
         method: "POST",
@@ -91,22 +88,6 @@ export const CartTable = ({ token }) => {
       alert(error);
     }
   }
-
-  const handleProceedCheckout = () => {
-    window.localStorage.setItem("CART", JSON.stringify(tableData));
-    try {
-      dispatch(
-        getActualOrderData({
-          price: totalPrice,
-          quantity: tableData.length,
-          items: tableData,
-        })
-      );
-    } catch (error) {
-      alert(error.message);
-    }
-    redirect("/checkout/");
-  };
 
   return (
     <div>
@@ -178,13 +159,18 @@ export const CartTable = ({ token }) => {
           </Table>
         </div>
       )}
-      <Button
-        variant="success"
-        style={{ marginLeft: "40%" }}
-        onClick={handleProceedCheckout}
-      >
-        Proceed to checkout
-      </Button>
+      {totalPrice === 0 ? null : (
+        <Button
+          variant="success"
+          style={{ marginLeft: "40%" }}
+          onClick={() => {
+            window.localStorage.setItem("CART", JSON.stringify(tableData));
+            redirect("/checkout/");
+          }}
+        >
+          Proceed to checkout
+        </Button>
+      )}
     </div>
   );
 };

@@ -108,6 +108,12 @@ class AddressSerializer(ModelSerializer):
         fields = ("street_address", "apartment_address")
 
 
+class CouponSerializer(ModelSerializer):
+    class Meta:
+        model = Coupon
+        fields = ("amount", "code")
+
+
 class OrderItemSerializer(ModelSerializer):
     item = SerializerMethodField()
     final_price = SerializerMethodField()
@@ -127,10 +133,11 @@ class OrderSerializer(ModelSerializer):
     order_items = SerializerMethodField()
     total = SerializerMethodField()
     shipping_address = AddressSerializer()
+    coupon = CouponSerializer()
 
     class Meta:
         model = Order
-        fields = ("id", "order_items", "total", "shipping_address")
+        fields = ("id", "order_items", "total", "shipping_address", "coupon")
 
     def get_total(self, obj):
         return obj.get_total()

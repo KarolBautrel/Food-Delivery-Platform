@@ -1,10 +1,18 @@
 import { CheckoutForm } from "./CheckoutForm";
 import { CouponForm } from "./CouponForm";
+import { CheckoutHeader } from "./CheckoutHeader";
 import { useQuery } from "@tanstack/react-query";
-import Container from "react-bootstrap/Container";
+import { AlertMessage } from "../../components/AlertMessage";
+import { useState, setState } from "react";
+
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 export const CheckoutSummary = () => {
+  const [alertMessage, setAlertMessage] = useState({
+    status: false,
+    alert: "danger",
+    body: "",
+  });
   const authData = JSON.parse(window.localStorage.getItem("AUTH_CREDENTIALS"));
   const { data, status } = useQuery(["summary"], () =>
     fetch("/api/order-summary", {
@@ -15,35 +23,29 @@ export const CheckoutSummary = () => {
 
   if (status === "loading") return <div>Loading...</div>;
   if (status === "error") return <div>Error</div>;
-  const orderdata = data[0];
+  const orderData = data[0];
   return (
-    <div className="card" style={{ width: "50%", marginLeft: "25%" }}>
-      <div>
-        <h2>You are about to buy</h2>
+    <div>
+      <AlertMessage
+        alertMessage={alertMessage}
+        setAlertMessage={setAlertMessage}
+      />
+      <div className="card" style={{ width: "50%", marginLeft: "25%" }}>
+        <CheckoutHeader orders={orderData} />
         <Row>
-          {orderdata.order_items.map((item) => (
-            <div key={item.id}>
-              <h5>
-                {item.item.name}, qty
-                {item.quantity}, for: {item.final_price} $
-              </h5>
-              <h5></h5>
-            </div>
-          ))}
+          <Col>
+            <CheckoutForm authData={authData} order={orderData} />
+          </Col>
+          <Col>
+            <CouponForm
+              authData={authData}
+              price={orderData.total}
+              coupon={orderData.coupon}
+              setAlertMessage={setAlertMessage}
+            />
+          </Col>
         </Row>
       </div>
-      <Row>
-        <Col>
-          <CheckoutForm items={data.order_items} authData={authData} />
-        </Col>
-        <Col>
-          <CouponForm
-            items={orderdata.order_items}
-            authData={authData}
-            price={orderdata.total}
-          />
-        </Col>
-      </Row>
     </div>
   );
 };

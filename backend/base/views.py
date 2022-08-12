@@ -27,6 +27,9 @@ from backend.settings import STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY, SITE_URL
 from django.db.models import Q
 
 
+stripe.api_key = STRIPE_SECRET_KEY
+
+
 class LoginView(APIView):
     def post(self, request, *args, **kwargs):
         email = request.data.get("email", None)
@@ -141,7 +144,7 @@ class AddToCartView(APIView):
         return Response(order, status=HTTP_200_OK)
 
 
-class UpdateOrderQuantity(APIView):
+class RemoveFromCartView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
@@ -227,13 +230,36 @@ class OrderDetailView(generics.ListAPIView):
         return queryset
 
 
-class CommentsCreateView(generics.CreateAPIView):
-    queryset = Comments.objects.all()
-    serializer_class = CommentsSerializer
-    permission_classes = (IsAuthenticated,)
+class CommentsCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        body = request.data.get("body", None)
+        rate = request.data.get("rate", None)
+        commented_subject = request.data.get("commented_subject")
 
-    def perform_create(self, serializer):
-        serializer.save(creator=self.request.user)
+        try:
+            commented_restaurant = Restaurant.objects.get(id=commented_subject)
+        except:
+            return Response(
+                {"Message": "No restaturant with this id"}, status=HTTP_400_BAD_REQUEST
+            )
+
+        comment_qs = Comments.objects.filter(
+            Q(creator=self.request.user) & Q(commented_subject=commented_restaurant)
+        )
+        if comment_qs.exists():
+            return Response(
+                {"Message": "Error, you can only cxomment once per restaurant"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        else:
+            new_comment = Comments.objects.create(
+                body=body,
+                rate=rate,
+                commented_subject=commented_restaurant,
+                creator=self.request.user,
+            )
+            new_comment.save()
+            return Response({"Message": "Success"}, status=HTTP_200_OK)
 
 
 class CommentDetailView(generics.RetrieveAPIView):
@@ -362,8 +388,8 @@ class ActivateCouponView(APIView):
 
 
 class CreateStripeCheckoutSession(APIView):
-    def post(self, request, *args, **kwargs):
-        order_id = request.data.get("order_id", None)
+    def get(self, request, *args, **kwargs):
+        order_id = self.kwargs["pk"]
         try:
             order = Order.objects.get(id=order_id)
         except:
@@ -373,24 +399,27 @@ class CreateStripeCheckoutSession(APIView):
                 line_items=[
                     {
                         "price_data": {
-                            "currency": "usd",
-                            "unit_amount": int(order.get_total()),
+                            "currency": "pln",
+                            "unit_amount": int(order.get_total()) * 100,
                             "product_data": {"name": order.user.name},
                         },
                         "quantity": 1,
                     }
                 ],
                 mode="payment",
+                payment_method_types=["card", "p24", "blik"],
                 success_url=SITE_URL + "?success=true",
                 cancel_url=SITE_URL + "?canceled=true",
             )
-
-        except:
+            return redirect(checkout_session.url, code=303)
+        except Exception as e:
             return Response(
-                {"Message": "Couldnt create session"}, status=HTTP_400_BAD_REQUEST
+                {
+                    "msg": "something went wrong while creating stripe session",
+                    "error": str(e),
+                },
+                status=500,
             )
-
-        return redirect(checkout_session.url, code=303)
 
 
 class CompleteCheckout(APIView):

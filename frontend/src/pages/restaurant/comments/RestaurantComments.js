@@ -5,11 +5,17 @@ import CommentForm from "./CommentForm";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { CommentCard } from "./CommentCard";
+import { AlertMessage } from "../../../components/AlertMessage";
+
 export const RestaurantComments = ({ data, RestaurantId, refetch }) => {
   const { token } = useSelector((state) => state.auth);
   const [commentsData, setCommentsData] = useState(data || []);
   const authData = JSON.parse(window.localStorage.getItem("AUTH_CREDENTIALS"));
-
+  const [alertMessage, setAlertMessage] = useState({
+    status: false,
+    alert: "danger",
+    body: "",
+  });
   async function handleRefresh() {
     try {
       const resp = await fetch(`/api/restaurant/${RestaurantId}`);
@@ -27,6 +33,10 @@ export const RestaurantComments = ({ data, RestaurantId, refetch }) => {
   return (
     <>
       <Row>
+        <AlertMessage
+          alertMessage={alertMessage}
+          setAlertMessage={setAlertMessage}
+        />
         <h1 style={{ marginLeft: "40%" }}>Comments</h1>
         <Col>
           {data.comments.map((comment) => (
@@ -45,8 +55,7 @@ export const RestaurantComments = ({ data, RestaurantId, refetch }) => {
             <div>
               <CommentForm
                 data={commentsData}
-                handleRefresh={handleRefresh}
-                refetch={refetch}
+                setAlertMessage={setAlertMessage}
               />
             </div>
           )}

@@ -8,7 +8,6 @@ import Col from "react-bootstrap/Col";
 import { useNavigate } from "react-router-dom";
 
 export const RestaurantBook = ({ data, token, setAlertMessage }) => {
-  const redirect = useNavigate();
   const queryClient = useQueryClient();
 
   const [tablesQuantity, setTableQuantity] = useState(0);
@@ -54,15 +53,17 @@ export const RestaurantBook = ({ data, token, setAlertMessage }) => {
         variant: "danger",
         body: error.message,
       });
-      setShow(false);
     }
   };
 
   const mutation = useMutation(bookTable, {
     onSuccess: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries(["restaurant", "me"]);
+      queryClient.invalidateQueries(["restaurant"]);
+      queryClient.invalidateQueries(["me"]);
+
       setShow(false);
+      console.log("elo");
     },
   });
   return (
