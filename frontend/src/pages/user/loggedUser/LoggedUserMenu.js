@@ -30,9 +30,9 @@ export const LoggedUserMenu = () => {
   if (status === "error") return <p>Error</p>;
   return (
     <>
-      <a className="rounded-border-btn" onClick={handleShow}>
+      <Button variant="outline-secondary" onClick={handleShow}>
         My Profile
-      </a>
+      </Button>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Profile Settings ({data.name})</Modal.Title>

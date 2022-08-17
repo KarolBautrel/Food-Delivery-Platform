@@ -1,4 +1,6 @@
 import { useState } from "react";
+import Button from "react-bootstrap/Button";
+
 import "./Searchbar.css";
 export const Searchbar = ({ handleSearch }) => {
   const [searchingTerm, setSearchingTerm] = useState("");
@@ -15,14 +17,15 @@ export const Searchbar = ({ handleSearch }) => {
             }}
           />
         </label>
-        <button
+        <Button
+          variant="outline-secondary"
           onClick={() => {
             handleSearch(searchingTerm);
           }}
           className="button search-button"
         >
           Search
-        </button>
+        </Button>
       </div>
     </div>
   );

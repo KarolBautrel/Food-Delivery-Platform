@@ -1,4 +1,6 @@
 import React from "react";
+import Button from "react-bootstrap/Button";
+
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -28,9 +30,9 @@ export const Logout = () => {
 
   return (
     <div>
-      <button className="button" onClick={handleClick}>
+      <Button variant="outline-secondary" onClick={handleClick}>
         Logout
-      </button>
+      </Button>
     </div>
   );
 };

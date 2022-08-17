@@ -19,7 +19,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <SessionHandler>
-        <div className="App">
+        <div className="App  bg-gradient-to-tr from-red-300 to-yellow-200">
           <BrowserRouter>
             <Navbar />
             <Routes>
