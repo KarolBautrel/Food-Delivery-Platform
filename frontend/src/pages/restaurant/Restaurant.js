@@ -4,31 +4,27 @@ import { DishesList } from "./DishesList";
 import { RestaurantDetails } from "./restaurantDashboard/RestaurantDetails";
 import { RestaurantComments } from "./comments/RestaurantComments";
 import { RestaurantBook } from "./restaurantDashboard/RestaurantBook";
-import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { AlertMessage } from "../../components/AlertMessage";
-
+import { useRestaurantQuery } from "./api/useRestaurantQuery";
 import "./Restaurant.css";
 export const Restaurant = () => {
   const { id } = useParams();
-  const { data, status, refetch } = useQuery(
-    ["restaurant"],
-    () => fetch(`/api/restaurant/${id}`).then((response) => response.json()),
-    { refetchOnWindowFocus: "always" }
-  );
+
+  const { restaurantQuery } = useRestaurantQuery(id);
   const [alertMessage, setAlertMessage] = useState({
     status: false,
     alert: "danger",
     body: "",
   });
   const { token } = useSelector((state) => state.auth);
-  if (status === "error") {
+  if (restaurantQuery.status === "error") {
     return <div>An error occured during connection</div>;
   }
 
   return (
     <div>
-      {status === "loading" ? (
+      {restaurantQuery.status === "loading" ? (
         <div> Loading...</div>
       ) : (
         <div>
@@ -36,15 +32,15 @@ export const Restaurant = () => {
             alertMessage={alertMessage}
             setAlertMessage={setAlertMessage}
           />
-          <RestaurantDetails data={data} />
+          <RestaurantDetails data={restaurantQuery.data} />
           <RestaurantBook
-            data={data}
+            data={restaurantQuery.data}
             token={token}
             setAlertMessage={setAlertMessage}
           />
 
-          <DishesList data={data} />
-          <RestaurantComments data={data} RestaurantId={id} refetch={refetch} />
+          <DishesList data={restaurantQuery.data} />
+          <RestaurantComments data={restaurantQuery.data} RestaurantId={id} />
         </div>
       )}
     </div>

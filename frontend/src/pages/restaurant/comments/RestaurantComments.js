@@ -7,7 +7,7 @@ import Col from "react-bootstrap/Col";
 import { CommentCard } from "./CommentCard";
 import { AlertMessage } from "../../../components/AlertMessage";
 
-export const RestaurantComments = ({ data, RestaurantId, refetch }) => {
+export const RestaurantComments = ({ data, RestaurantId }) => {
   const { token } = useSelector((state) => state.auth);
   const [commentsData, setCommentsData] = useState(data || []);
   const authData = JSON.parse(window.localStorage.getItem("AUTH_CREDENTIALS"));

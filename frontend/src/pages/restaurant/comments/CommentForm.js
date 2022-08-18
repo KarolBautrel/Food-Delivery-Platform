@@ -45,7 +45,6 @@ function CommentForm({ data, setAlertMessage }) {
     onSuccess: () => {
       // Invalidate and refetch
       queryClient.invalidateQueries(["restaurant"]);
-      console.log("udalo sie");
     },
   });
   return (
