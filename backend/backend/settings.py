@@ -101,9 +101,9 @@ DJOSER = {
     "SET_PASSWORD_RETYPE": True,
 }
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
+    "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
-    ),
+    ],
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }
 # Password validation
@@ -180,3 +180,8 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_HOST_USER = "botfooddelivery@gmail.com"
 EMAIL_HOST_PASSWORD = os.getenv("GMAIL_PASSWORD")
 EMAIL_PORT = 587
+DATE_FORMAT = "%d/%m/%Y"
+USE_L10N = False
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+SITE_URL = "http://localhost:3000/"

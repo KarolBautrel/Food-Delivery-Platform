@@ -6,16 +6,16 @@
   }
   .navbar nav {
     display: flex;
-    align-items: center;
+    justify-content: space-between;
     max-width: 1200px;
     margin: 0 auto;
   }
-  .navbar a.brand {
+  .navbar-buttons.brand {
     margin-right: auto;
     color: #fff;
     text-decoration: none;
   }
-  .navbar a:last-child {
+   .navbar-buttons:last-child {
     color: #fff;
     text-decoration: none;
     margin-left: 40px;
@@ -23,7 +23,7 @@
     border: 1px solid #fff;
     border-radius: 4px;
   }
-  .navbar a {
+  .navbar-buttons {
     color: #fff;
     text-decoration: none;
     margin-left: 40px;
@@ -31,11 +31,13 @@
     border: 1px solid #fff;
     border-radius: 4px;
   }
-  .navbar a:last-child:hover {
+   a:last-child:hover {
     background: #fff;
     color: #333;
   }
-  .navbar a:hover {
+   a:hover {
     background: #fff;
     color: #333;
   }
+  
+  

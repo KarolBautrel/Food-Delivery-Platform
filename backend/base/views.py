@@ -1,6 +1,6 @@
 from calendar import c
 from urllib.error import HTTPError
-from django.shortcuts import render
+from django.shortcuts import redirect
 from .models import *
 from rest_framework import generics
 from .serializers import *
@@ -11,10 +11,57 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_404_NOT_FOUND,
+    HTTP_400_BAD_REQUEST,
+)
 from django_filters.rest_framework import DjangoFilterBackend
 from .tasks import booking_mail_sender
 from datetime import datetime
+from django.contrib.auth.hashers import check_password
+from rest_framework.authtoken.models import Token
+from django.db import models
+import stripe
+from backend.settings import STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY, SITE_URL
+from django.db.models import Q
+
+
+stripe.api_key = STRIPE_SECRET_KEY
+
+
+class LoginView(APIView):
+    def post(self, request, *args, **kwargs):
+        email = request.data.get("email", None)
+        password = request.data.get("password", None)
+        try:
+            user = User.objects.get(email=email)
+        except:
+            return Response(
+                {"Message": "There is no user with this kind of email"},
+                status=HTTP_404_NOT_FOUND,
+            )
+        if check_password(password, user.password):
+            try:
+                token = Token.objects.get(user=user)
+                token.delete()
+                token = Token.objects.create(user=user)
+                return Response(
+                    {"token": token.key, "email": user.email, "username": user.username}
+                )
+            except:
+                token = Token.objects.create(user=user)
+                return Response(
+                    {
+                        "token": token.key,
+                        "email": user.email,
+                        "username": user.username,
+                        "id": user.id,
+                    }
+                )
+
+        else:
+            return Response("Password doesnt match", status=HTTP_404_NOT_FOUND)
 
 
 class RetrieveCurrentUserView(generics.RetrieveAPIView):
@@ -24,6 +71,12 @@ class RetrieveCurrentUserView(generics.RetrieveAPIView):
     def get_object(self):
         obj = User.objects.get(id=self.request.user.id)
         return obj
+
+
+class UserChangeEmailView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (RequestUserAllowed,)
+    serializer_class = EmailChangeSerializer
 
 
 class ListRestaurantsViewset(generics.ListAPIView):
@@ -59,7 +112,6 @@ class AddToCartView(APIView):
             Dish,
             id=product_id,
         )
-
         order_item_qs = OrderItem.objects.filter(
             item=item, user=request.user, ordered=False
         )
@@ -68,27 +120,31 @@ class AddToCartView(APIView):
             order_item = order_item_qs.first()
             order_item.quantity += 1
             order_item.save()
+            serializer = OrderItemSerializer(order_item)
         else:
             order_item = OrderItem.objects.create(
                 item=item, user=request.user, ordered=False
             )
             order_item.save()
+            serializer = OrderItemSerializer(order_item)
         order_qs = Order.objects.filter(user=request.user, ordered=False)
         if order_qs.exists():
             order = order_qs[0]
             if not order.items.filter(item__id=order_item.id).exists():
                 order.items.add(order_item)
-                return Response({"Message": "success"}, status=HTTP_200_OK)
+
+                return Response(serializer.data, status=HTTP_200_OK)
         else:
             ordered_date = timezone.now()
             order = Order.objects.create(user=request.user, ordered_date=ordered_date)
             order.items.add(order_item)
-            return Response({"Message": "success"}, status=HTTP_200_OK)
+            serializer = OrderItemSerializer(order)
+            return Response(serializer.data, status=HTTP_200_OK)
 
-        return Response({"Message": "success"}, status=HTTP_200_OK)
+        return Response(order, status=HTTP_200_OK)
 
 
-class UpdateOrderQuantity(APIView):
+class RemoveFromCartView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
@@ -112,10 +168,14 @@ class UpdateOrderQuantity(APIView):
                 if order_item.quantity > 1:
                     order_item.quantity -= 1
                     order_item.save()
+                    serializer = OrderItemSerializer(order_item)
+                    return Response(serializer.data, status=HTTP_200_OK)
                 else:
                     order.items.remove(order_item)
                     order_item.delete()
-                return Response(status=HTTP_200_OK)
+                    serializer = OrderItemSerializer(order_item)
+                return Response(serializer.data, status=HTTP_200_OK)
+
             else:
                 return Response(
                     {"message": "This item was not in your cart"},
@@ -127,6 +187,25 @@ class UpdateOrderQuantity(APIView):
                 {"message": "You do not have an active order"},
                 status=HTTP_400_BAD_REQUEST,
             )
+
+
+class RemoveProductFromCartView(APIView):
+    permission_classes = (IsAuthenticated, RequestUserAllowed)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            order_item_id = request.data.get("order", None)
+        except:
+            return Response({"Message": "There is no order with this id"})
+        try:
+            order_item = OrderItem.objects.get(id=order_item_id)
+        except:
+            return Response({"Message": "There is no order with this id"})
+        order_item.delete()
+        serializer = OrderItemSerializer(
+            OrderItem.objects.filter(user=request.user), many=True
+        )
+        return Response(serializer.data, status=HTTP_200_OK)
 
 
 class OrderItemCartDetailView(generics.ListAPIView):
@@ -151,13 +230,36 @@ class OrderDetailView(generics.ListAPIView):
         return queryset
 
 
-class CommentsCreateView(generics.CreateAPIView):
-    queryset = Comments.objects.all()
-    serializer_class = CommentsSerializer
-    permission_classes = (IsAuthenticated,)
+class CommentsCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        body = request.data.get("body", None)
+        rate = request.data.get("rate", None)
+        commented_subject = request.data.get("commented_subject")
 
-    def perform_create(self, serializer):
-        serializer.save(creator=self.request.user)
+        try:
+            commented_restaurant = Restaurant.objects.get(id=commented_subject)
+        except:
+            return Response(
+                {"Message": "No restaturant with this id"}, status=HTTP_400_BAD_REQUEST
+            )
+
+        comment_qs = Comments.objects.filter(
+            Q(creator=self.request.user) & Q(commented_subject=commented_restaurant)
+        )
+        if comment_qs.exists():
+            return Response(
+                {"Message": "Error, you can only cxomment once per restaurant"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        else:
+            new_comment = Comments.objects.create(
+                body=body,
+                rate=rate,
+                commented_subject=commented_restaurant,
+                creator=self.request.user,
+            )
+            new_comment.save()
+            return Response({"Message": "Success"}, status=HTTP_200_OK)
 
 
 class CommentDetailView(generics.RetrieveAPIView):
@@ -190,16 +292,26 @@ class BookTableView(APIView):
         try:
             restaurant_id = request.data.get("restaurant", None)
             tables_quantity = int(request.data.get("tables_quantity", None))
+            date = request.data.get("date", None)
+            print(tables_quantity, date)
+            if tables_quantity == 0 or date == None:
+                return Response(
+                    {"Message": "tables quantity and date cant be none"},
+                    status=HTTP_400_BAD_REQUEST,
+                )
         except ValueError:
             return Response({"Message": "Restauran doesnt exist"})
+        date = models.DateField().to_python(date)
         restaurant_qs = Restaurant.objects.filter(id=restaurant_id)
         if restaurant_qs.exists:
             restaurant = restaurant_qs.first()
+            print(restaurant)
             if restaurant.available_tables() >= tables_quantity:
                 TableBooking.objects.create(
                     booker=request.user,
                     restaurant=restaurant,
                     tables_quantity=tables_quantity,
+                    booking_date=date,
                 )
                 booking_mail_sender.delay(
                     request.user.email, restaurant.name, datetime.now(), tables_quantity
@@ -215,7 +327,7 @@ class BookTableView(APIView):
             )
 
 
-class FinishTableReservationView(APIView):
+class CancelTableReservationView(APIView):
     permission_classes = (TableBookerAllow,)
 
     def delete(self, request, *args, **kwargs):
@@ -241,7 +353,7 @@ class FinishTableReservationView(APIView):
 class ActivateCouponView(APIView):
     def put(self, request, *args, **kwargs):
         try:
-            order_id = request.data.get("order", None)
+            user_id = request.data.get("user", None)
             coupon_code = request.data.get("coupon", None)
         except:
             return Response(
@@ -256,15 +368,16 @@ class ActivateCouponView(APIView):
                 status=HTTP_400_BAD_REQUEST,
             )
 
-        order_qs = Order.objects.filter(id=order_id)
+        order_qs = Order.objects.filter(user=user_id)
         if order_qs.exists():
             order = order_qs.first()
             order.coupon = coupon
             coupon.is_used = True
             coupon.save()
             order.save()
+            serializer = OrderSerializer(order)
             return Response(
-                {"Message": "Success"},
+                serializer.data,
                 status=HTTP_200_OK,
             )
         else:
@@ -272,3 +385,67 @@ class ActivateCouponView(APIView):
                 {"Message": "Order does not exists"},
                 status=HTTP_400_BAD_REQUEST,
             )
+
+
+class CreateStripeCheckoutSession(APIView):
+    def get(self, request, *args, **kwargs):
+        order_id = self.kwargs["pk"]
+        try:
+            order = Order.objects.get(id=order_id)
+        except:
+            return Response({"Message": "Incorret order"}, status=HTTP_400_BAD_REQUEST)
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": "pln",
+                            "unit_amount": int(order.get_total()) * 100,
+                            "product_data": {"name": order.user.name},
+                        },
+                        "quantity": 1,
+                    }
+                ],
+                mode="payment",
+                payment_method_types=["card", "p24", "blik"],
+                success_url=SITE_URL + "?success=true",
+                cancel_url=SITE_URL + "?canceled=true",
+            )
+            return redirect(checkout_session.url, code=303)
+        except Exception as e:
+            return Response(
+                {
+                    "msg": "something went wrong while creating stripe session",
+                    "error": str(e),
+                },
+                status=500,
+            )
+
+
+class CompleteCheckout(APIView):
+    def post(self, request, *args, **kwargs):
+        user_id = request.data.get("user_id", None)
+        street_address = request.data.get("street_address", None)
+        apartment_address = request.data.get("apartment_address", None)
+
+        try:
+            order = Order.objects.get(user=user_id)
+        except:
+            return Response({"Message": "User dont have "})
+
+        address_qs = Address.objects.filter(
+            Q(street_address=street_address) & Q(apartment_address=apartment_address)
+        )
+        if address_qs.exists():
+            address = address_qs.first()
+        else:
+
+            address = Address.objects.create(
+                street_address=street_address,
+                apartment_address=apartment_address,
+            )
+            address.save()
+        order.shipping_address = address
+        order.save()
+        serializer = OrderSerializer(order)
+        return Response(serializer.data, status=HTTP_200_OK)

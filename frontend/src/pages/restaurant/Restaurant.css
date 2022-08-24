@@ -1,0 +1,12 @@
+.restaurant-header{
+    display: flex;
+    justify-content: space-between;
+}
+
+.body{
+    display: center;
+    margin-left: 10%;
+}
+.header-list{
+    list-style-type: none;
+}
